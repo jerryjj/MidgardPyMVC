@@ -1,19 +1,39 @@
-This file is for you to describe the midgardmvc application. Typically
-you would include information such as the information below:
+Midgard Python MVC
+==================
 
-Installation and Setup
-======================
+Installation and development setup
+==================================
 
-Install ``midgardmvc`` using easy_install::
+First create virtualenv for Python somewhere ie. in your home -dir. This script installs virtualenv with Pylons:
 
-    easy_install midgardmvc
+	curl http://pylonshq.com/download/0.9.7/go-pylons.py | python - midgard_pylons
 
-Make a config file as follows::
+Activate the virtual environment:
 
-    paster make-config midgardmvc config.ini
+	source midgard_pylons/bin/activate
+	
+Next go back to ``midgardmvc`` folder and run the following to download all dependencies
 
-Tweak the config file as appropriate and then setup the application::
+	python setup.py develop
 
-    paster setup-app config.ini
+Then setup simple Midgard site with default Midgard objects
 
-Then you are ready to go.
+	paster setup-app development.ini
+
+Production
+==========
+
+Make a config file as follows:
+
+    paster make-config midgardmvc production.ini
+
+Tweak the config file as appropriate and then setup the application:
+
+    paster setup-app production.ini
+
+Running with paster
+===================
+
+Using the --reload switch allows you to develop without restarting the server after code changes
+
+	paster serve --reload development.ini
