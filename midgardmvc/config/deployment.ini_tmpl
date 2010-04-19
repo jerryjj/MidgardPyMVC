@@ -35,6 +35,8 @@ app_instance_uuid = ${app_instance_uuid}
 # execute malicious code after an exception is raised.
 set debug = false
 
+midgard.config_path = %(here)s/midgard.ini
+midgard.logger = midgardmvc
 
 # Logging configuration
 [loggers]
