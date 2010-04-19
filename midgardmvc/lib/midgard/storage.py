@@ -37,10 +37,10 @@ class StorageWrapper(object):
             self.createDefaultContent()
         
     def baseStorageExists(self):
-        if connection_instance.midgard_config.dbtype.lower() == "sqlite":
-            """TODO: Try to resolve using dbdir -configuration key, after it is enbaled in Midgard"""
-            db_file_path = os.path.expanduser('~/.midgard2/data/' + connection_instance.midgard_config.database + '.db')
-            return os.path.exists(db_file_path)
+        # if connection_instance.midgard_config.dbtype.lower() == "sqlite":
+        #     """TODO: Try to resolve using dbdir -configuration key, after it is enbaled in Midgard"""
+        #     db_file_path = os.path.expanduser('~/.midgard2/data/' + connection_instance.midgard_config.database + '.db')
+        #     return os.path.exists(db_file_path)
         
         return midgard.storage.class_storage_exists("midgard_user")
     
