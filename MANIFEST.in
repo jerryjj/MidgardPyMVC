@@ -1,0 +1,3 @@
+include midgardmvc/config/deployment.ini_tmpl
+recursive-include midgardmvc/public *
+recursive-include midgardmvc/templates *
