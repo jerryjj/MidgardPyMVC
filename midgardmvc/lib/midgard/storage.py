@@ -112,7 +112,7 @@ class StorageWrapper(object):
                 root_page.create()
                 self._log.debug("/midcom_root -page created")
             except:
-                self._log.error("Could not create root page, reason: %s" % (classname, midgard._connection.get_error_string()))
+                self._log.error("Could not create root page, reason: %s" % midgard._connection.get_error_string())
         
         print root_page
         print "guid: %s" % root_page.guid
