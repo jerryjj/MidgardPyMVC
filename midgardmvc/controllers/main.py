@@ -9,8 +9,11 @@ import midgardmvc.lib.helpers as h
 
 log = logging.getLogger(__name__)
 
-class MainController(BaseController):
+from midgardmvc.lib.midgard.decorators import authenticated
 
+class MainController(BaseController):
+    
+    @authenticated
     def index(self):
         c.page = h.midgard.mgdschema.midgard_page()
         page_found = c.page.get_by_path('/midcom_root')
