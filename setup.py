@@ -7,7 +7,7 @@ except ImportError:
 
 setup(
     name='midgardmvc',
-    version='0.1',
+    version='0.1.2',
     description='Midgard MVC in Python',
     author='Jerry Jalava',
     author_email='jerry.jalava@iki.fi',
