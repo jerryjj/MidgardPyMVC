@@ -46,6 +46,10 @@ class MidgardPasswordAuth(MidgardAuth):
         log.debug("Person:")
         log.debug(person)
         
+        identity["midgard.user"] = user
+        identity["midgard.user.guid"] = user.guid
+        identity["midgard.person.guid"] = person.guid
+        
         return person.guid
 
 def _prepare_password(password, authtype):
