@@ -9,7 +9,7 @@ import midgardmvc.lib.helpers as h
 
 log = logging.getLogger(__name__)
 
-from midgardmvc.lib.midgard.decorators import authenticated
+from midgardmvc.lib.midgard.auth.decorators import authenticated
 
 class MainController(BaseController):
     
