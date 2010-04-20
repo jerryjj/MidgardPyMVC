@@ -8,14 +8,17 @@ except ImportError:
 setup(
     name='midgardmvc',
     version='0.1',
-    description='',
-    author='',
-    author_email='',
+    description='Midgard MVC in Python',
+    author='Jerry Jalava',
+    author_email='jerry.jalava@iki.fi',
     url='',
     install_requires=[
-        "python-midgard2",
+        #"python-midgard2",
         "Pylons>=0.9.7",
         "Babel>=0.9.4",
+        "repoze.who>=2.0a2",
+        "repoze.who-friendlyform",
+        "repoze.who-testutil",
         "cssutils",
         "WebHelpers>=1.0b5"
     ],
