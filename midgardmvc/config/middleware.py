@@ -10,8 +10,9 @@ from pylons.wsgiapp import PylonsApp
 from routes.middleware import RoutesMiddleware
 
 from midgardmvc.config.environment import load_environment
-#from midgardmvc.lib.mgd import initMidgard
 from midgardmvc.lib.midgard import init_midgard_connection
+
+from repoze.who.config import make_middleware_with_config as make_who_with_config
 
 def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
     """Create a Pylons WSGI application and return it
@@ -48,7 +49,9 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
     app = RoutesMiddleware(app, config['routes.map'])
     app = SessionMiddleware(app, config)
     app = CacheMiddleware(app, config)
-
+    
+    app = make_who_with_config(app, global_conf, app_conf['who.config_file'], app_conf['who.log_file'], app_conf['who.log_level'])
+    
     # CUSTOM MIDDLEWARE HERE (filtered by error handling middlewares)
 
     if asbool(full_stack):

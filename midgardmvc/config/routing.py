@@ -22,6 +22,11 @@ def make_map():
     
     map.connect('/', controller='main', action='index')
     map.connect('/{language}', controller='main', action='index', requirements=dict(language='\w{2}'))
+
+    map.connect('/__mgd-auth/{action}', controller='auth')
+    map.connect('/{language}/__mgd-auth/{action}', controller='auth', requirements=dict(language='\w{2}'))
+    map.connect('/__mgd-auth/doLogin', controller='login', action='doLogin')
+    map.connect('/{language}/__mgd-auth/doLogin', controller='login', action='doLogin', requirements=dict(language='\w{2}'))
     
     map.connect('/{path}', controller="page", action="show")
     map.connect('/{language}/{path}', controller="page", action="show", requirements=dict(language='\w{2}'))
