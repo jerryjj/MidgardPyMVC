@@ -3,7 +3,6 @@
     <head>
         <title>${ c.title }</title>
 		
-		${h.javascript_link('/midcom-static/net_nemein_dasboard/js/toolbar.js')}
 		${h.stylesheet_link('/midcom-static/midgardmvc_core/midgard/screen.css', media="screen,projection,tv")}
 		${h.stylesheet_link('/midcom-static/midgardmvc_core/midgard/content.css')}
 		${h.stylesheet_link('/midcom-static/midgardmvc_core/services/uimessages/simple.css')}
