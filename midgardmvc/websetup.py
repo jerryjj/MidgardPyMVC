@@ -11,7 +11,7 @@ def setup_app(command, conf, vars):
     load_environment(conf.global_conf, conf.local_conf)
     log.debug("Trying to connect to Midgard")
     
-    connected = init_midgard_connection(conf["midgard.config_path"], conf["midgard.logger"], conf)
+    connected = init_midgard_connection(conf["midgard.config_path"], conf["midgard.logger"])
     
     if not connected:
         return
