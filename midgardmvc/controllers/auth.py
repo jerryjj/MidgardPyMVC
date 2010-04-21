@@ -1,7 +1,7 @@
 import logging
 
 from pylons import request, response, session, tmpl_context as c, url
-from pylons.controllers.util import abort, redirect_to
+from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
 
 from midgardmvc.lib.base import BaseController, render
@@ -35,12 +35,12 @@ class AuthController(BaseController):
             redirect(url(controller='login', action='login', came_from=came_from,
                                 __logins=login_counter))
         
-        userid = identity['repoze.who.userid']
-        h.flash_ok('Welcome back, %s!' % userid)
+        person = identity['midgard.person']
+        h.flash_ok('Welcome back, %s!' % person.firstname)
         
         redirect(url(came_from))
     
     def post_logout(self):
         """ This is where the user ends up after logging out. """
         
-        return render('/auth/post_logout.mako')
+        return render('/auth/post_logout')
