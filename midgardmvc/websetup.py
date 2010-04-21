@@ -20,7 +20,7 @@ def setup_app(command, conf, vars):
     
     log.debug("Initalizing Midgard storage")
     
-    initialized = init_midgard_storage(conf["midgard.config_path"], conf["midgard.logger"], conf)
+    initialized = init_midgard_storage(conf["midgard.config_path"], conf["midgard.logger"])
     
     if not initialized:
         return    

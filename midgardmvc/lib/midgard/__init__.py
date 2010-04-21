@@ -27,7 +27,7 @@ def init_midgard_connection(mgd_config_path, mgd_logger):
     
     return connection_instance.connected
     
-def init_midgard_storage(mgd_config_path, mgd_logger, pylons_config):    
+def init_midgard_storage(mgd_config_path, mgd_logger):    
     mgd_config = ConfigParser.SafeConfigParser()
     mgd_config.read(mgd_config_path)
 
