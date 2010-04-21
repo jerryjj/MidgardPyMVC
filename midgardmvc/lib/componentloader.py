@@ -31,7 +31,8 @@ def _load_instance(entry_point):
     instance = cls(component_config={})
     
     if not instance.__purecode__:
-        instance.prepareRoutes()
+        instance.loadConfiguration()
+        instance.prepareRoutes()        
     
     return instance
 
@@ -43,6 +44,10 @@ def update_paths(paths):
         #Update template paths
         if component.__templates_dir__:
             paths["templates"].append(component.__templates_dir__)
+
+        #Update static file paths
+        if component.__static_files__:
+            paths["static_files"].append(component.__static_files__)
         
     return paths
 
