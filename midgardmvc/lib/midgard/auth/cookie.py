@@ -9,6 +9,8 @@ log = logging.getLogger(__name__)
 
 import midgardmvc.lib.helpers as h
 
+from webob.exc import HTTPFound
+
 from paste.request import construct_url, get_cookies
 from paste.auth import auth_tkt
 
