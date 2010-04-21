@@ -21,7 +21,8 @@ setup(
         "repoze.who-friendlyform",
         "repoze.who-testutil",
         "cssutils",
-        "WebHelpers>=1.0b5"
+        "WebHelpers>=1.0b5",
+        "Routes>=1.12.1"
     ],
     setup_requires=["PasteScript>=1.6.3"],
     test_suite='nose.collector',
