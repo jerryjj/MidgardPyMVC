@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 
 import midgardmvc.lib.helpers as h
 
-from paste.request import get_cookies
+from paste.request import construct_url, get_cookies
 from paste.auth import auth_tkt
 
 from zope.interface import implements
