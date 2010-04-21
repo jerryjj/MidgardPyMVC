@@ -113,12 +113,6 @@ class StorageWrapper(object):
                 self._log.debug("/midcom_root -page created")
             except:
                 self._log.error("Could not create root page, reason: %s" % midgard._connection.get_error_string())
-        
-        print root_page
-        print "guid: %s" % root_page.guid
-        print "name: %s" % root_page.name
-        print "title: %s" % root_page.title
-        print "content: %s" % root_page.content
     
 def _returnToPointer(function_pointer, return_pointer, function_args=None):
     if function_args is None:
