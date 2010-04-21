@@ -75,6 +75,7 @@ class StorageWrapper(object):
         
         for classname in self.config["schemas"]:
             create_ok = True
+            update_ok = True
             
             if not self.classStorageExists(classname):
                 self._log.debug("creating class storage for %s" % classname)
@@ -91,6 +92,23 @@ class StorageWrapper(object):
                 self._log.debug("done")
             else:
                 self._log.debug("Class %s exists" % classname)
+                self._log.debug("Trying to update...")
+                
+                cthread = threading.Thread(name=classname + ' storageUpdate', target=_returnToPointer, args=(midgard.storage.update_class_storage, update_ok), kwargs={ 'function_args': classname, } )
+                if cthread == None:
+                    self._log.error("could not create thread for update_class_storage(%s)" % classname)
+                    raise Exception("could not create thread for update_class_storage(%s)" % classname)
+                cthread.start()
+                while cthread.isAlive():
+                    self._log.debug("waiting for %s" % cthread.getName())
+                    cthread.join(0.1)
+                self._log.debug("waiting (blocking) for %s" % cthread.getName())
+                cthread.join()
+                self._log.debug("done")
+                
+                if not update_ok:
+                    self._log.error("Error while updating storage for class %s, reason: %s" % (classname, midgard._connection.get_error_string()))
+                
             if not create_ok:
                 self._log.error("Could not create storage for class %s, reason: %s" % (classname, midgard._connection.get_error_string()))
                 raise Exception("Could not create storage for class %s, reason: %s" % (classname, midgard._connection.get_error_string()))
