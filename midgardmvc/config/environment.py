@@ -9,20 +9,25 @@ import midgardmvc.lib.app_globals as app_globals
 import midgardmvc.lib.helpers
 from midgardmvc.config.routing import make_map
 
+import midgardmvc.lib.componentloader
+
 def load_environment(global_conf, app_conf):
     """Configure the Pylons environment via the ``pylons.config``
     object
     """
     # Pylons paths
-    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))    
     paths = dict(root=root,
                  controllers=os.path.join(root, 'controllers'),
                  static_files=os.path.join(root, 'public'),
                  templates=[os.path.join(root, 'templates')])
-
+    
+    midgardmvc.lib.componentloader.load_all()
+    paths = midgardmvc.lib.componentloader.update_paths(paths)
+    
     # Initialize config with the basic options
     config.init_app(global_conf, app_conf, package='midgardmvc', paths=paths)
-
+    
     config['routes.map'] = make_map()
     config['pylons.app_globals'] = app_globals.Globals()
     config['pylons.h'] = midgardmvc.lib.helpers
@@ -37,3 +42,6 @@ def load_environment(global_conf, app_conf):
 
     # CONFIGURATION OPTIONS HERE (note: all config options will override
     # any Pylons config options)
+
+    
+    

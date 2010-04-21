@@ -12,6 +12,7 @@ setup(
     author='Jerry Jalava',
     author_email='jerry.jalava@iki.fi',
     url='',
+    namespace_packages = ['midgardmvc', 'midgardmvc.components', 'midgardmvc.controllers'],
     install_requires=[
         #"python-midgard2",
         "Pylons>=0.9.7",

@@ -7,6 +7,8 @@ refer to the routes manual at http://routes.groovie.org/docs/
 from pylons import config
 from routes import Mapper
 
+import midgardmvc.lib.componentloader
+
 def make_map():
     """Create, configure and return the routes Mapper"""
     map = Mapper(directory=config['pylons.paths']['controllers'],
@@ -17,16 +19,16 @@ def make_map():
     # likely stay at the top, ensuring it can always be resolved
     map.connect('/error/{action}', controller='error')
     map.connect('/error/{action}/{id}', controller='error')
-
-    # CUSTOM ROUTES HERE
     
     map.connect('/', controller='main', action='index')
     map.connect('/{language}', controller='main', action='index', requirements=dict(language='\w{2}'))
-
+    
     map.connect('/__mgd-auth/{action}', controller='auth')
     map.connect('/{language}/__mgd-auth/{action}', controller='auth', requirements=dict(language='\w{2}'))
-    map.connect('/__mgd-auth/doLogin', controller='login', action='doLogin')
-    map.connect('/{language}/__mgd-auth/doLogin', controller='login', action='doLogin', requirements=dict(language='\w{2}'))
+    map.connect('/__mgd-auth/doLogin', controller='login', action='doLogin', conditions=dict(method=["POST"]))
+    map.connect('/{language}/__mgd-auth/doLogin', controller='login', action='doLogin', requirements=dict(language='\w{2}'), conditions=dict(method=["POST"]))    
+    
+    # CUSTOM ROUTES HERE
     
     map.connect('/{path}', controller="page", action="show")
     map.connect('/{language}/{path}', controller="page", action="show", requirements=dict(language='\w{2}'))
@@ -35,5 +37,7 @@ def make_map():
     map.connect('/{controller}/{action}/{id}')
     map.connect('/{language}/{controller}/{action}', requirements=dict(language='\w{2}'))
     map.connect('/{language}/{controller}/{action}/{id}', requirements=dict(language='\w{2}'))
-
+    
+    map = midgardmvc.lib.componentloader.connect_routes(map)
+    
     return map
