@@ -22,7 +22,8 @@ setup(
         "repoze.who-testutil",
         "cssutils",
         "WebHelpers>=1.0b5",
-        "Routes>=1.12.1"
+        "Routes>=1.12.1",
+        #"cogen", #Uncomment this if you wish to use Cogen
     ],
     setup_requires=["PasteScript>=1.6.3"],
     test_suite='nose.collector',
@@ -35,6 +36,8 @@ setup(
            ('public/**', 'ignore', None)]},
     zip_safe=False,
     paster_plugins=['PasteScript', 'Pylons'],
+    # If you wish to use Cogen change paste.app_factory below to be:
+    # main = midgardmvc.config.cogen_middleware:make_app
     entry_points="""
     [paste.app_factory]
     main = midgardmvc.config.middleware:make_app
