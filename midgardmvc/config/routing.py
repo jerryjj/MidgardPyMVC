@@ -8,11 +8,13 @@ from pylons import config
 from routes import Mapper
 
 import midgardmvc.lib.componentloader
+from midgardmvc.lib.midgard.utils import controller_scan
 
 def make_map():
     """Create, configure and return the routes Mapper"""
     map = Mapper(directory=config['pylons.paths']['controllers'],
-                 always_scan=config['debug'])
+                 always_scan=config['debug'],
+                 controller_scan=controller_scan)
     map.minimization = False
     
     # The ErrorController route (handles 404/500 error pages); it should
@@ -30,6 +32,8 @@ def make_map():
     
     # CUSTOM ROUTES HERE
     
+    map = midgardmvc.lib.componentloader.connect_routes(map)
+    
     map.connect('/{path}', controller="page", action="show")
     map.connect('/{language}/{path}', controller="page", action="show", requirements=dict(language='\w{2}'))
     
@@ -37,7 +41,5 @@ def make_map():
     map.connect('/{controller}/{action}/{id}')
     map.connect('/{language}/{controller}/{action}', requirements=dict(language='\w{2}'))
     map.connect('/{language}/{controller}/{action}/{id}', requirements=dict(language='\w{2}'))
-    
-    map = midgardmvc.lib.componentloader.connect_routes(map)
     
     return map

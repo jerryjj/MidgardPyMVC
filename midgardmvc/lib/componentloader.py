@@ -1,5 +1,5 @@
 from pkg_resources import iter_entry_points
-
+import os
 import logging
 log = logging.getLogger(__name__)
 
@@ -36,6 +36,8 @@ def _load_instance(entry_point):
     
     return instance
 
+
+
 def update_paths(paths):        
     for name, component in _components.iteritems():
         if component.__purecode__:
@@ -48,6 +50,11 @@ def update_paths(paths):
         #Update static file paths
         if component.__static_files__:
             paths["static_files"].append(component.__static_files__)
+            
+        #Update controllers paths
+        controllers_path = os.path.abspath(component.component_root + "/../../controllers/")
+        if os.path.exists(controllers_path):
+            paths["controllers"].append(controllers_path)
         
     return paths
 
