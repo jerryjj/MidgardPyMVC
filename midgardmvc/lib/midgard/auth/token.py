@@ -52,7 +52,7 @@ class MidgardTokenAuth(MidgardAuth):
         )        
         self.config.update(config)
         
-        self.authtype = "OAuth"
+        self.authtype = "Plaintext"
 
     # IIdentifier
     def identify(self, environ):
@@ -60,26 +60,8 @@ class MidgardTokenAuth(MidgardAuth):
         cookies = get_cookies(environ)
         cookie = cookies.get(self.config["cookie_name"])
         
-        if cookie is None or not cookie.value:        
-            current_user = h.midgard._connection.get_user()
-        
-            if current_user:
-                identity = {
-                    "login": current_user.login,
-                    "midgard.user.guid": current_user.guid
-                }
-                
-                script_name = environ.get('SCRIPT_NAME') or '/'
-                referer = environ.get('HTTP_REFERER', script_name)
-                destination = referer #construct_url(environ)
-                environ['repoze.who.application'] = HTTPFound(location=destination)
-            
-                log.debug("identity: ")
-                log.debug(identity)
-            
-                return identity
-            else:
-                return self._create_tokenUser()
+        if cookie is None or not cookie.value:
+            return self._create_tokenUser()
         
         if self.config["include_ip"]:
             remote_addr = environ['REMOTE_ADDR']
@@ -141,6 +123,7 @@ class MidgardTokenAuth(MidgardAuth):
                 timestamp,userid,tokens,userdata = auth_tkt.parse_ticket(
                     self.config["secret"], old_cookie_value, remote_addr)
             except auth_tkt.BadTicket:
+                log.error("Bad ticket")
                 pass
 
         who_userid = identity['midgard.user.guid'] + "|" + identity.get('login')
@@ -194,6 +177,9 @@ class MidgardTokenAuth(MidgardAuth):
             return None
         
         user = h.midgard.db.user.get({"login": identity.get("login"), "authtype": self.authtype}) #, "password": password
+        if not user:
+            log.error("User (%s / %s) not found, reason: %s" % (identity.get("login"), self.authtype, h.midgard._connection.get_error_string()))
+        
         log.debug("user: ")
         log.debug(user)
 
