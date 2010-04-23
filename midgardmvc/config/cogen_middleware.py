@@ -12,7 +12,10 @@ from routes.middleware import RoutesMiddleware
 from midgardmvc.config.environment import load_environment
 from midgardmvc.lib.midgard import init_midgard_connection, init_midgard_authentication
 
-def make_app(global_conf, full_stack=False, static_files=True, **app_conf):
+from cogen.web.async import LazyStartResponseMiddleware
+from cogen.web.async import SynchronousInputMiddleware
+
+def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
     """Create a Pylons WSGI application and return it
 
     ``global_conf``
@@ -77,12 +80,8 @@ def make_app(global_conf, full_stack=False, static_files=True, **app_conf):
     
     app = init_midgard_authentication(app, global_conf, app_conf)
     
-    from cogen.web.async import LazyStartResponseMiddleware
-    app = LazyStartResponseMiddleware(app)
-    
-    app = SessionMiddleware(app, config)
-    
-    from cogen.web.async import SynchronousInputMiddleware
-    app = SynchronousInputMiddleware(app)    
+    app = LazyStartResponseMiddleware(app, global_conf)    
+    app = SessionMiddleware(app, config)    
+    app = SynchronousInputMiddleware(app, global_conf)
 
     return app
