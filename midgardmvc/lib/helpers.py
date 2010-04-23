@@ -8,6 +8,7 @@ from pylons import url, request, response
 
 from webhelpers.html import literal
 from webhelpers.html.tags import *
+from webhelpers.pylonslib.minify import stylesheet_link, javascript_link
 
 from webhelpers.pylonslib import Flash as _Flash
 
