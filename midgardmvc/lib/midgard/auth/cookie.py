@@ -46,23 +46,7 @@ class MidgardCookieAuth(AuthTktCookiePlugin):
         cookie = cookies.get(self.cookie_name)
 
         if cookie is None or not cookie.value:
-            current_user = h.midgard._connection.get_user()
-        
-            if current_user:
-                identity = {
-                    "login": current_user.login,
-                    "midgard.user.guid": current_user.guid
-                }
-                
-                destination = construct_url(environ)
-                environ['repoze.who.application'] = HTTPFound(location=destination)
-                
-                log.debug("identity: ")
-                log.debug(identity)
-                
-                return identity
-            else:
-                return None
+            return None
 
         if self.include_ip:
             remote_addr = environ['REMOTE_ADDR']
@@ -103,6 +87,8 @@ class MidgardCookieAuth(AuthTktCookiePlugin):
     
     # IIdentifier
     def remember(self, environ, identity):
+        log.debug("cookieAuth remember")
+        
         if self.include_ip:
             remote_addr = environ['REMOTE_ADDR']
         else:
@@ -160,6 +146,8 @@ class MidgardCookieAuth(AuthTktCookiePlugin):
 
     # IAuthenticator
     def authenticate(self, environ, identity):
+        log.debug("cookieAuth authenticate")
+        
         user_guid = identity.get('midgard.user.guid')
         
         log.debug("cookieAuth authenticate")
@@ -173,7 +161,7 @@ class MidgardCookieAuth(AuthTktCookiePlugin):
         
         user = h.midgard.db.user.get({"login": identity.get("login"), "authtype": self.authtype})
         if not user:
-            log.error("Could not create root page, reason: %s" % h.midgard._connection.get_error_string())
+            log.error("User (%s / %s) not found, reason: %s" % (identity.get("login"), self.authtype, h.midgard._connection.get_error_string()))
         
         log.debug("user: ")
         log.debug(user)
