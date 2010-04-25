@@ -72,10 +72,10 @@ class MidgardTokenAuth(MidgardAuth):
             timestamp, userid, tokens, user_data = auth_tkt.parse_ticket(
                 self.config["secret"], cookie.value, remote_addr)
         except auth_tkt.BadTicket:
-            return None
+            return self._create_tokenUser()
 
         if self.config["timeout"] and ( (timestamp + self.config["timeout"]) < time.time() ):
-            return None
+            return self._create_tokenUser()
 
         userid_typename = 'userid_type:'
         user_data_info = user_data.split('|')
