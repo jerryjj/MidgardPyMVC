@@ -3,10 +3,11 @@ from zope.interface import implements
 
 import ConfigParser
 import os
+from pkg_resources import resource_string, resource_filename
 
 class ComponentBase(object):
     implements(IComponent)
-
+    __name__ = __name__
     __purecode__ = False
     
     __routes__ = []
@@ -18,9 +19,19 @@ class ComponentBase(object):
     def __init__(self, config=None):
         self.override_config = config
         self.config = dict()
-        self.component_root = None
+        
+        self.component_root = self.resolveComponentPath('/')
+        self.__config_dir__ = os.path.join(self.component_root, 'config')
+        self.__templates_dir__ = os.path.join(self.component_root, 'templates')
+        self.__static_files__ = os.path.join(self.component_root, 'public')
         
         self.initialize()
+    
+    def resolveComponentPath(self, dir_name):
+        return resource_filename(self.__name__, dir_name)
+    
+    def resolveComponentResource(self, resource):
+        return resource_string(self.__name__, resource)
     
     def loadConfiguration(self, name="default"):
         config = ConfigParser.SafeConfigParser(dict(
@@ -55,7 +66,6 @@ class ComponentBase(object):
                 tmp[item[0]] = item[1]
         
         return tmp
-        
     
     def prepareRoutes(self):
         pass
