@@ -12,7 +12,11 @@ from webhelpers.pylonslib.minify import stylesheet_link, javascript_link
 
 from webhelpers.pylonslib import Flash as _Flash
 
+import logging
+log = logging.getLogger(__name__)
+
 import _midgard as midgard
+#from midgardmvc.lib.midgard.middleware import MIDGARD as midgard
 
 flash = _Flash()
 
