@@ -159,14 +159,21 @@ class MidgardCookieAuth(AuthTktCookiePlugin):
         if self.userid_checker and not self.userid_checker(user_guid):
             return None
         
-        user = h.midgard.db.user.get({"login": identity.get("login"), "authtype": self.authtype})
-        if not user:
-            log.error("User (%s / %s) not found, reason: %s" % (identity.get("login"), self.authtype, h.midgard._connection.get_error_string()))
+        # user = h.midgard.db.user.get({"login": identity.get("login"), "authtype": self.authtype})
+        
+        qb = h.midgard.query_builder('midgard_user')
+        qb.add_constraint('guid', '=', user_guid)
+        
+        user = False
+        results = qb.execute()
+        if len(results) > 0:
+            user = results[0]
         
         log.debug("user: ")
         log.debug(user)
 
         if not user:
+            log.error("User %s (%s / %s) not found, reason: %s" % (user_guid, identity.get("login"), self.authtype, h.midgard._connection.get_error_string()))
             return None
         
         status = user.log_in()

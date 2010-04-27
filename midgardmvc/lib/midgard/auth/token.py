@@ -176,14 +176,21 @@ class MidgardTokenAuth(MidgardAuth):
         if user_guid is None:
             return None
         
-        user = h.midgard.db.user.get({"login": identity.get("login"), "authtype": self.authtype}) #, "password": password
-        if not user:
-            log.error("User (%s / %s) not found, reason: %s" % (identity.get("login"), self.authtype, h.midgard._connection.get_error_string()))
+        # user = h.midgard.db.user.get({"login": identity.get("login"), "authtype": self.authtype}) #, "password": password
+        
+        qb = h.midgard.query_builder('midgard_user')
+        qb.add_constraint('guid', '=', user_guid)
+        
+        user = False
+        results = qb.execute()
+        if len(results) > 0:
+            user = results[0]
         
         log.debug("user: ")
         log.debug(user)
 
         if not user:
+            log.error("User %s (%s / %s) not found, reason: %s" % (user_guid, identity.get("login"), self.authtype, h.midgard._connection.get_error_string()))
             return None
         
         status = user.log_in()
@@ -210,13 +217,17 @@ class MidgardTokenAuth(MidgardAuth):
         person.lastname = "Person"
         
         try:
-            person.create()
+            status = person.create()
             log.debug("Person created with GUID: %s" % person.guid)
         except:
             log.error("Could not create person, reason: %s" % (h.midgard._connection.get_error_string()))
             return None
         
-        user_login_name = "tokenauth_%s" % person.guid
+        if not status:
+            log.error("Could not create person, reason: %s" % (h.midgard._connection.get_error_string()))
+            return None
+        
+        user_login_name = "tokenauth_%s_%s" % (int(time.time()), person.guid)
         
         user = h.midgard.db.user()
         user.login = user_login_name
@@ -226,9 +237,13 @@ class MidgardTokenAuth(MidgardAuth):
         user.usertype = 1
         
         try:
-            user.create()
+            status = user.create()
             log.debug("User %s created with GUID: %s" % (user.login, user.guid))
         except:
+            log.error("Could not create user, reason: %s" % (h.midgard._connection.get_error_string()))
+            return None
+        
+        if not status:
             log.error("Could not create user, reason: %s" % (h.midgard._connection.get_error_string()))
             return None
         
