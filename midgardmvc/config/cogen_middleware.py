@@ -10,7 +10,7 @@ from pylons.wsgiapp import PylonsApp
 from routes.middleware import RoutesMiddleware
 
 from midgardmvc.config.environment import load_environment
-from midgardmvc.lib.midgard import init_midgard_connection, init_midgard_authentication
+from midgardmvc.lib.midgard import make_midgard_middleware, init_midgard_connection, init_midgard_authentication
 
 from cogen.web.async import LazyStartResponseMiddleware
 from cogen.web.async import SynchronousInputMiddleware
@@ -51,7 +51,7 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
     app = CacheMiddleware(app, config)
     
     # CUSTOM MIDDLEWARE HERE (filtered by error handling middlewares)
-
+    
     if asbool(full_stack):
         # Handle Python exceptions
         #app = ErrorHandler(app, global_conf, **config['pylons.errorware'])
@@ -79,6 +79,8 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
         app = Cascade(static_apps)
     
     app = init_midgard_authentication(app, global_conf, app_conf)
+
+    app = make_midgard_middleware(app, config["midgard.config_path"], config["midgard.logger"])
     
     app = LazyStartResponseMiddleware(app, global_conf)    
     app = SessionMiddleware(app, config)    
