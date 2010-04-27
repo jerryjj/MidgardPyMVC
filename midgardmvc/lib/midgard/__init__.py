@@ -5,25 +5,19 @@ import ConfigParser
 from pylons import config
 from paste.deploy.converters import asbool
 
-from midgardmvc.lib.midgard.connection import instance as connection_instance
-from midgardmvc.lib.midgard.storage import instance as storage_instance
-
 _mgd_config = None
 
-def init_midgard_connection(mgd_config_path, mgd_logger):    
-    global _mgd_config
+def make_midgard_middleware(app, mgd_config_path, mgd_logger):
+    if not _mgd_config:
+        _load_midgard_config_to_globals(mgd_config_path)
     
-    _mgd_config = ConfigParser.SafeConfigParser()    
-    config_paths = [mgd_config_path]
-    
-    local_mgd_config_path = _resolve_local_config_path(mgd_config_path)
-    
-    if local_mgd_config_path:
-        config_paths.append(local_mgd_config_path)
-    
-    _mgd_config.read(config_paths)
-    
-    parse_midgard_config_to_globals(_mgd_config)
+    mw = middleware.MidgardMiddleware(app, _mgd_config, mgd_logger)
+
+    return mw
+
+def init_midgard_connection(mgd_config_path, mgd_logger):
+    if not _mgd_config and mgd_config_path:
+        _load_midgard_config_to_globals(mgd_config_path)
     
     if not connection_instance.connected:    
         connection_config = get_section_from_config(_mgd_config, "Connection")
@@ -36,11 +30,11 @@ def init_midgard_connection(mgd_config_path, mgd_logger):
     return connection_instance.connected
     
 def init_midgard_storage(mgd_config_path, mgd_logger):    
-    mgd_config = ConfigParser.SafeConfigParser()
-    mgd_config.read(mgd_config_path)
-
+    if not _mgd_config and mgd_config_path:
+        _load_midgard_config_to_globals(mgd_config_path)
+    
     if not storage_instance.initialized:
-        storage_config = get_section_from_config(mgd_config, "Storage")
+        storage_config = get_section_from_config(_mgd_config, "Storage")
         
         storage_instance.setLogger(logging.getLogger(mgd_logger))
         storage_instance.setConfig(storage_config)
@@ -56,6 +50,21 @@ def init_midgard_authentication(app, global_conf, app_conf):
         app = make_middleware_with_config(app, global_conf, config['who.config_file'], config['who.log_file'], config['who.log_level'])
     
     return app
+
+def _load_midgard_config_to_globals(mgd_config_path):
+    global _mgd_config
+    
+    _mgd_config = ConfigParser.SafeConfigParser()    
+    config_paths = [mgd_config_path]
+    
+    local_mgd_config_path = _resolve_local_config_path(mgd_config_path)
+    
+    if local_mgd_config_path:
+        config_paths.append(local_mgd_config_path)
+    
+    _mgd_config.read(config_paths)
+    
+    parse_midgard_config_to_globals(_mgd_config)
 
 def parse_midgard_config_to_globals(midgard_config):    
     def _resolve_key(section, key):
@@ -90,3 +99,8 @@ def _resolve_local_config_path(config_path):
         return local_config_path
     
     return None
+
+from midgardmvc.lib.midgard.connection import instance as connection_instance
+from midgardmvc.lib.midgard.storage import instance as storage_instance
+
+from midgardmvc.lib.midgard import middleware
