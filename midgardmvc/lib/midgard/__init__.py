@@ -1,3 +1,4 @@
+import os
 import logging
 import ConfigParser
 
@@ -12,8 +13,15 @@ _mgd_config = None
 def init_midgard_connection(mgd_config_path, mgd_logger):    
     global _mgd_config
     
-    _mgd_config = ConfigParser.SafeConfigParser()
-    _mgd_config.read(mgd_config_path)
+    _mgd_config = ConfigParser.SafeConfigParser()    
+    config_paths = [mgd_config_path]
+    
+    local_mgd_config_path = _resolve_local_config_path(mgd_config_path)
+    
+    if local_mgd_config_path:
+        config_paths.append(local_mgd_config_path)
+    
+    _mgd_config.read(config_paths)
     
     parse_midgard_config_to_globals(_mgd_config)
     
@@ -70,3 +78,15 @@ def get_section_from_config(config, section):
 
 def get_connection():
     return connection_instance.connection
+
+def _resolve_local_config_path(config_path):
+    local_config_path = ""
+    
+    root, filename = os.path.split(config_path)
+    
+    local_config_path = os.path.join(root, filename.replace(".ini", ".local.ini"))
+    
+    if os.path.exists(local_config_path):    
+        return local_config_path
+    
+    return None
