@@ -31,17 +31,17 @@ def get_active_user():
         return None
     
     if not identity.has_key("midgard.user"):
-        if not identity.has_key("midgard.user.guid"):
-            return h.midgard._connection.get_user()
-        else:
-            qb = h.midgard.query_builder('midgard_user')
-            qb.add_constraint('guid', '=', identity["midgard.user.guid"])
-            
-            results = qb.execute()
-            if len(results) > 0:
-                return results[0]
-            
-            return None
+        # if not identity.has_key("midgard.user.guid"):
+        #     return h.midgard._connection.get_user()
+        # else:
+        qb = h.midgard.query_builder('midgard_user')
+        qb.add_constraint('guid', '=', identity["midgard.user.guid"])
+        
+        results = qb.execute()
+        if len(results) > 0:
+            return results[0]
+        
+        return None
     
     return identity["midgard.user"]
     

@@ -61,7 +61,7 @@ class MidgardTokenAuth(MidgardAuth):
         cookie = cookies.get(self.config["cookie_name"])
         
         if cookie is None or not cookie.value:
-            return self._create_tokenUser()
+            return self._create_tokenUser(environ)
         
         if self.config["include_ip"]:
             remote_addr = environ['REMOTE_ADDR']
@@ -72,10 +72,10 @@ class MidgardTokenAuth(MidgardAuth):
             timestamp, userid, tokens, user_data = auth_tkt.parse_ticket(
                 self.config["secret"], cookie.value, remote_addr)
         except auth_tkt.BadTicket:
-            return self._create_tokenUser()
+            return self._create_tokenUser(environ)
 
         if self.config["timeout"] and ( (timestamp + self.config["timeout"]) < time.time() ):
-            return self._create_tokenUser()
+            return self._create_tokenUser(environ)
 
         userid_typename = 'userid_type:'
         user_data_info = user_data.split('|')
@@ -168,36 +168,41 @@ class MidgardTokenAuth(MidgardAuth):
 
     # IAuthenticator
     def authenticate(self, environ, identity):
-        user_guid = identity.get('midgard.user.guid')
-        
         log.debug("tokenAuth authenticate")
         log.debug(identity)
+        
+        user_guid = identity.get('midgard.user.guid')        
         
         if user_guid is None:
             return None
         
-        # user = h.midgard.db.user.get({"login": identity.get("login"), "authtype": self.authtype}) #, "password": password
+        if "midgard.midgard" in environ:
+            midgard = environ["midgard.midgard"]
+        else:
+            midgard = h.midgard
         
-        qb = h.midgard.query_builder('midgard_user')
-        qb.add_constraint('guid', '=', user_guid)
+        user = midgard.db.user.get({"login": identity.get("login"), "password": identity.get("login"), "authtype": self.authtype}) #, "password": password
         
-        user = False
-        results = qb.execute()
-        if len(results) > 0:
-            user = results[0]
+        # qb = midgard.query_builder('midgard_user')
+        # qb.add_constraint('guid', '=', user_guid)
+        # 
+        # user = False
+        # results = qb.execute()
+        # if len(results) > 0:
+        #     user = results[0]
         
         log.debug("user: ")
         log.debug(user)
 
         if not user:
-            log.error("User %s (%s / %s) not found, reason: %s" % (user_guid, identity.get("login"), self.authtype, h.midgard._connection.get_error_string()))
+            log.error("User %s (%s / %s) not found, reason: %s" % (user_guid, identity.get("login"), self.authtype, midgard._connection.get_error_string()))
             return None
         
-        status = user.log_in()
-        log.debug("User login status: %s" % status)
-        
-        if not status:
-            return None
+        # status = user.log_in()
+        # log.debug("User login status: %s" % status)
+        # 
+        # if not status:
+        #     return None
         
         identity["midgard.user"] = user
         if not identity.get("midgard.person.guid"):
@@ -209,10 +214,15 @@ class MidgardTokenAuth(MidgardAuth):
         
         return identity["midgard.person.guid"]
     
-    def _create_tokenUser(self):
+    def _create_tokenUser(self, environ):
         log.debug("tokenAuth _create_tokenUser")
         
-        person = h.midgard.mgdschema.midgard_person()
+        if "midgard.midgard" in environ:
+            midgard = environ["midgard.midgard"]
+        else:
+            midgard = h.midgard
+        
+        person = midgard.mgdschema.midgard_person()
         person.firstname = "TokenAuth"
         person.lastname = "Person"
         
@@ -220,31 +230,32 @@ class MidgardTokenAuth(MidgardAuth):
             status = person.create()
             log.debug("Person created with GUID: %s" % person.guid)
         except:
-            log.error("Could not create person, reason: %s" % (h.midgard._connection.get_error_string()))
+            log.error("Could not create person, reason: %s" % (midgard._connection.get_error_string()))
             return None
         
         if not status:
-            log.error("Could not create person, reason: %s" % (h.midgard._connection.get_error_string()))
+            log.error("Could not create person, reason: %s" % (midgard._connection.get_error_string()))
             return None
         
-        user_login_name = "tokenauth_%s_%s" % (int(time.time()), person.guid)
+        #user_login_name = "tokenauth_%s_%s" % (int(time.time()), person.guid)
+        user_login_name = "tokenauth_%s" % (person.guid)
         
-        user = h.midgard.db.user()
+        user = midgard.db.user()
         user.login = user_login_name
-        user.password = person.guid
+        user.password = user_login_name
         user.authtype = self.authtype
         user.active = True
-        user.usertype = 2 #1 = normal user. 2 = admin. Admin user is currently used as Midgard user auth isn't thread safe
+        user.usertype = 1
         
         try:
             status = user.create()
             log.debug("User %s created with GUID: %s" % (user.login, user.guid))
         except:
-            log.error("Could not create user, reason: %s" % (h.midgard._connection.get_error_string()))
+            log.error("Could not create user, reason: %s" % (midgard._connection.get_error_string()))
             return None
         
         if not status:
-            log.error("Could not create user, reason: %s" % (h.midgard._connection.get_error_string()))
+            log.error("Could not create user, reason: %s" % (midgard._connection.get_error_string()))
             return None
         
         person_status = user.set_person(person)
