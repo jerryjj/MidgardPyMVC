@@ -234,7 +234,7 @@ class MidgardTokenAuth(MidgardAuth):
         user.password = person.guid
         user.authtype = self.authtype
         user.active = True
-        user.usertype = 1
+        user.usertype = 2 #1 = normal user. 2 = admin. Admin user is currently used as Midgard user auth isn't thread safe
         
         try:
             status = user.create()
