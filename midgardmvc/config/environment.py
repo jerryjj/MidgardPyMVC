@@ -10,6 +10,7 @@ import midgardmvc.lib.helpers
 from midgardmvc.config.routing import make_map
 
 import midgardmvc.lib.componentloader
+from paste.deploy.converters import asbool
 
 def load_environment(global_conf, app_conf):
     """Configure the Pylons environment via the ``pylons.config``
@@ -27,6 +28,11 @@ def load_environment(global_conf, app_conf):
     
     # Initialize config with the basic options
     config.init_app(global_conf, app_conf, package='midgardmvc', paths=paths)
+    
+    if global_conf.has_key("mail.on") and asbool(global_conf["mail.on"]):
+        from turbomail.adapters import tm_pylons
+        tm_pylons.config = config
+        tm_pylons.start_extension()
     
     config['routes.map'] = make_map()
     config['pylons.app_globals'] = app_globals.Globals()
