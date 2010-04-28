@@ -158,6 +158,9 @@ class MidgardTokenAuth(MidgardAuth):
             cur_domain = environ.get('HTTP_HOST', environ.get('SERVER_NAME'))
             wild_domain = '.' + cur_domain
             if old_cookie_value != new_cookie_value:
+                if "auth_remember_allow" in environ and environ["auth_remember_allow"] == False:
+                    return None
+                
                 # return a set of Set-Cookie headers
                 return self._get_cookies(environ, new_cookie_value, max_age)
 
