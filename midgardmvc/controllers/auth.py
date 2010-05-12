@@ -32,7 +32,7 @@ class AuthController(BaseController):
         if not identity:
             # The user provided the wrong credentials
             login_counter = request.environ['repoze.who.logins'] = request.environ.get('repoze.who.logins', 0) + 1
-            redirect(url(controller='login', action='login', came_from=came_from,
+            redirect(url(controller='auth', action='login', came_from=came_from,
                                 __logins=login_counter))
         
         person = identity['midgard.person']
