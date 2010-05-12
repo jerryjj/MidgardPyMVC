@@ -1,9 +1,17 @@
 from midgardmvc.components.interfaces import IComponent, IPurecodeComponent
 from zope.interface import implements
 
-import ConfigParser
+#import ConfigParser
 import os
 from pkg_resources import resource_string, resource_filename
+
+import midgardmvc.components.configloader
+
+def load_config(path):
+    if not os.path.exists(path):
+        return dict()
+
+    return midgardmvc.components.configloader.load(file(path, 'r'))
 
 class ComponentBase(object):
     implements(IComponent)
@@ -20,10 +28,14 @@ class ComponentBase(object):
         self.override_config = config
         self.config = dict()
         
+        self._config_contexts = dict()
+        
         self.component_root = self.resolveComponentPath('/')
         self.__config_dir__ = os.path.join(self.component_root, 'config')
         self.__templates_dir__ = os.path.join(self.component_root, 'templates')
         self.__static_files__ = os.path.join(self.component_root, 'public')
+        
+        self.loadConfiguration()
         
         self.initialize()
     
@@ -34,39 +46,18 @@ class ComponentBase(object):
         return resource_string(self.__name__, resource)
     
     def loadConfiguration(self, name="default"):
-        config = ConfigParser.SafeConfigParser(dict(
-            root=self.component_root
-        ))
-        config.read(os.path.join(self.__config_dir__, name + ".ini"))
+        config_path = os.path.join(self.__config_dir__, name + ".yml")
+        if not os.path.exists(config_path):
+            if self.override_config:
+                self.config.update(self.override_config)
+            return
         
-        self.config = config
+        self._config_contexts[name] = load_config(config_path)
+        self.config.update(self._config_contexts[name])
+
+        if self.override_config:
+            self.config.update(self.override_config)
         
-        # parsed = self._parseConfig(config)
-        # print "parsed: "
-        # print parsed
-        # self.config.update(parsed)
-        # 
-        # if self.override_config:
-        #     self.config.update(self.override_config)
-        
-        # print "self.config: "
-        # print self.config
-    
-    def _parseConfig(self, config):
-        items = config.items("default")
-        tmp = dict()
-        
-        for item in items:
-            tmp[item[0]] = item[1]
-        
-        sections = config.sections()
-        for section in sections:            
-            items = config.items(section)
-            for item in items:
-                tmp[item[0]] = item[1]
-        
-        return tmp
-    
     def prepareRoutes(self):
         pass
 
@@ -74,3 +65,23 @@ class PurecodeComponentBase(ComponentBase):
     implements(IPurecodeComponent)
     
     __purecode__ = True
+
+# import setuptools.Command
+# 
+# def install_statics(Command):
+#     """This command install component statics to MVC public folder"""    
+# 
+#     description = "Install statics"
+#     user_options = tuple()
+#     
+#     def initialize_options(self):
+#         """init options"""
+#         pass
+# 
+#     def finalize_options(self):
+#         """finalize options"""
+#         pass
+# 
+#     def run(self):
+#         """runner"""
+#         pass

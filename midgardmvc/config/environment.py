@@ -23,7 +23,7 @@ def load_environment(global_conf, app_conf):
                  static_files=[os.path.join(root, 'public')],
                  templates=[os.path.join(root, 'templates')])
     
-    midgardmvc.lib.componentloader.load_all()
+    midgardmvc.lib.componentloader.load_all(global_conf)
     paths = midgardmvc.lib.componentloader.update_paths(paths)
     
     # Initialize config with the basic options

@@ -3,12 +3,19 @@ import os
 import logging
 log = logging.getLogger(__name__)
 
+from pkg_resources import resource_string, resource_filename
+from midgardmvc.components.base import load_config
+
 _components = {}
 
 class ComponentNotLoaded(Exception): pass
 
-def load_all():
-    global _components
+_project_root = None
+
+def load_all(global_conf):
+    global _project_root, _components
+    
+    _project_root = global_conf["here"]
     
     for entry_point in iter_entry_points(group='midgardmvc.component', name=None):
         log.debug("Loading component: %s" % entry_point.name)
@@ -28,15 +35,19 @@ def load(name):
 
 def _load_instance(entry_point):
     cls = entry_point.load()
-    instance = cls(component_config={})
+
+    override_config = None    
+    override_config_path = os.path.join(os.path.abspath(_project_root + '/config/'), entry_point.name + ".yml")
+    
+    if os.path.exists(override_config_path):
+        override_config = load_config(override_config_path)
+    
+    instance = cls(component_config=override_config)
     
     if not instance.__purecode__:
-        instance.loadConfiguration()
         instance.prepareRoutes()        
     
     return instance
-
-
 
 def update_paths(paths):        
     for name, component in _components.iteritems():
@@ -65,9 +76,21 @@ def connect_routes(map):
         map.extend(component.__routes__, component.__routes_prefix__)
     
     return map
+    
+def connect_components_to_environ(environ):
+    for name in _components:
+        environ[name] = _components[name]
+    
+    return environ
 
 def get(name):
     if not _components.has_key(name):
-        raise ComponentNotLoaded("Component not yet loaded!")
+        raise ComponentNotLoaded("Component %s not yet loaded!" % name)
     
     return _components[name]
+
+def get_config(name):
+    if not _components.has_key(name):
+        raise ComponentNotLoaded("Component %s not yet loaded!" % name)
+    
+    return _components[name].config    
