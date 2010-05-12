@@ -201,11 +201,11 @@ class MidgardTokenAuth(MidgardAuth):
             log.error("User %s (%s / %s) not found, reason: %s" % (user_guid, identity.get("login"), self.authtype, midgard._connection.get_error_string()))
             return None
         
-        # status = user.log_in()
-        # log.debug("User login status: %s" % status)
-        # 
-        # if not status:
-        #     return None
+        status = user.log_in()
+        log.debug("User login status: %s" % status)
+        
+        if not status:
+            return None
         
         identity["midgard.user"] = user
         if not identity.get("midgard.person.guid"):
