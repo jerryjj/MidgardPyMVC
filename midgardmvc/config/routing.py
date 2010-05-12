@@ -22,6 +22,8 @@ def make_map():
     map.connect('/error/{action}', controller='error')
     map.connect('/error/{action}/{id}', controller='error')
     
+    map = midgardmvc.lib.componentloader.connect_routes(map)
+    
     map.connect('/', controller='main', action='index')
     map.connect('/{language}', controller='main', action='index', requirements=dict(language='\w{2}'))
     
@@ -31,8 +33,6 @@ def make_map():
     map.connect('/{language}/__mgd-auth/doLogin', controller='login', action='doLogin', requirements=dict(language='\w{2}'), conditions=dict(method=["POST"]))    
     
     # CUSTOM ROUTES HERE
-    
-    map = midgardmvc.lib.componentloader.connect_routes(map)
     
     map.connect('/{path}', controller="page", action="show")
     map.connect('/{language}/{path}', controller="page", action="show", requirements=dict(language='\w{2}'))
