@@ -2,6 +2,9 @@ import _midgard
 #from midgardmvc.lib.midgard import MIDGARD, init_midgard_connection
 from midgardmvc.lib.midgard import init_midgard_connection
 
+import midgardmvc.lib.utils.fixed_datetime as datetime
+import midgardmvc.lib.componentloader
+
 import logging
 
 # from paste.registry import StackedObjectProxy
@@ -19,7 +22,6 @@ class MidgardMiddleware(object):
 
     def __call__(self, environ, start_response):
         self.log.debug("MidgardMiddleware::__call__")
-        #environ['midgard.pylons.application'] = self.app
         
         # if environ.has_key('paste.registry'):
         #     environ['paste.registry'].register(MIDGARD, _midgard)
@@ -27,15 +29,25 @@ class MidgardMiddleware(object):
         
         environ['midgard.midgard'] = _midgard
         
-        # status = init_midgard_connection(None, self.logger_name)
-        # self.log.debug("midgard connection status: %s" % status)
+        timezone = self.config.get("Datetime", "timezone", "UTC")
+        self.log.debug("Setting timezone to %s" % timezone)
         
-        # timezone = self.config.get("DateTime", "tz", "UTC")
-        # self.log.debug("Setting timezone to %s" % timezone)
-        # 
-        # datetime.set_default_timezone(timezone)
-        # environ['infigo.acs.datetime.currentTZ'] = self.getTimezone(timezone)
-        # environ['infigo.acs.datetime.getTZ'] = self.getTimezone
-        # environ['infigo.acs.datetime.defaultTZ'] = self.getDefaultTZ
+        datetime.set_default_timezone(timezone)
+        environ['midgard.datetime.currentTZ'] = self.getTimezone(timezone)
+        environ['midgard.datetime.getTZ'] = self.getTimezone
+        environ['midgard.datetime.defaultTZ'] = self.getDefaultTZ
         
-        return self.app(environ, start_response)    
+        environ = midgardmvc.lib.componentloader.connect_components_to_environ(environ)
+        
+        return self.app(environ, start_response)
+
+    def getTimezone(self, tz_str):
+    	import pytz
+
+    	if type(tz_str) is str or type(tz_str) is unicode:
+    		return pytz.timezone(tz_str)
+
+    	return None
+
+    def getDefaultTZ(self):
+    	return self.getTimezone(self.config.get("Datetime", "timezone", "UTC"))
