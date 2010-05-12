@@ -8,7 +8,7 @@ from pylons import config
 import logging
 log = logging.getLogger(__name__)
 
-from midgardmvc.lib.midgard.auth import MidgardAuth
+from midgardmvc.lib.midgard.auth import MidgardAuth, prepare_password
 import midgardmvc.lib.helpers as h
 
 class MidgardPasswordAuth(MidgardAuth):
@@ -20,7 +20,7 @@ class MidgardPasswordAuth(MidgardAuth):
         
         try:
             username = identity['login']
-            password = _prepare_password(identity['password'], authtype)
+            password = prepare_password(identity['password'], authtype)
         except KeyError:
             return None
         
@@ -51,16 +51,6 @@ class MidgardPasswordAuth(MidgardAuth):
         identity["midgard.person.guid"] = person.guid
         
         return person.guid
-
-def _prepare_password(password, authtype):
-    if authtype.lower() == "plaintext":
-        return password
-    elif authtype.lower() == "sha1":
-        return hashlib.sha1(password).hexdigest()
-    elif authtype.lower() == "sha256":
-        return hashlib.sha256(password).hexdigest()
-    elif authtype.lower() == "md5":
-        return hashlib.md5(password).hexdigest()
 
 def make_plugin(**config):
     return MidgardPasswordAuth(config)
