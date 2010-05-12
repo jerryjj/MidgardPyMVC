@@ -7,6 +7,9 @@ from paste.deploy.converters import asbool
 
 _mgd_config = None
 
+def get_config():
+    return _mgd_config
+
 def make_midgard_middleware(app, mgd_config_path, mgd_logger):
     if not _mgd_config:
         _load_midgard_config_to_globals(mgd_config_path)
