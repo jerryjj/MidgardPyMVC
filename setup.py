@@ -23,13 +23,16 @@ setup(
         "cssutils",
         "WebHelpers>=1.0b5",
         "Routes>=1.12.1",
+        "pytz",
+        "PyYAML",
+        #"turbomail", #Uncomment to enable TurboMail features
         #"cogen", #Uncomment this if you wish to use Cogen
     ],
     setup_requires=["PasteScript>=1.6.3"],
     test_suite='nose.collector',
     packages=find_packages(exclude=['ez_setup']),
     include_package_data=True,
-    package_data={'midgardmvc': ['i18n/*/LC_MESSAGES/*.mo', 'public/midcom-static/*']},
+    package_data={'midgardmvc': ['i18n/*/LC_MESSAGES/*.mo', 'public/midcom-static/*.*']},
     message_extractors={'midgardmvc': [
            ('**.py', 'python', None),
            ('templates/**.mako', 'mako', {'input_encoding': 'utf-8'}),
