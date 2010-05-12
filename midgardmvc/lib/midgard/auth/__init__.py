@@ -52,3 +52,15 @@ def get_active_user_person():
         return None
     
     return identity["midgard.person"]
+
+def prepare_password(password, authtype):
+    import hashlib
+    
+    if authtype.lower() == "plaintext":
+        return password
+    elif authtype.lower() == "sha1":
+        return hashlib.sha1(password).hexdigest()
+    elif authtype.lower() == "sha256":
+        return hashlib.sha256(password).hexdigest()
+    elif authtype.lower() == "md5":
+        return hashlib.md5(password).hexdigest()
