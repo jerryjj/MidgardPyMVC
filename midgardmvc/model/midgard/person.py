@@ -8,9 +8,9 @@ class FormSchema(formencode.Schema):
     ignore_key_missing = True
     
     def __classinit__(cls, new_attrs):
-        schema_fields = resolveSchemaFields(midgard.mgdschema.midgard_person)
-        
-        for name, field in schema_fields.iteritems():
+        schema_fields = resolveSchemaFields(midgard.mgdschema.midgard_person())
+
+        for name, field in schema_fields.iteritems():            
             if field["type"] != "string":
                 continue
             if cls.fields.has_key(name):
