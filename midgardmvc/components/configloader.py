@@ -12,4 +12,16 @@ def dump(data, stream=None):
     return yaml_dump(data, stream, Dumper=Dumper)
 
 def merge(original, override):
-    return original.update(override)
+    if not isinstance(original, dict):
+        original = dict()
+    
+    if not isinstance(override, dict):
+        return override
+    
+    for key, value in override.iteritems():
+        if isinstance(value, dict):
+            original[key] = merge(original.get(key, dict()), value)
+        else:
+            original[key] = value
+    
+    return original
