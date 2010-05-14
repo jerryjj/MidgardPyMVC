@@ -47,16 +47,17 @@ class ComponentBase(object):
     
     def loadConfiguration(self, name="default"):
         config_path = os.path.join(self.__config_dir__, name + ".yml")
+        
         if not os.path.exists(config_path):
             if self.override_config:
-                self.config.update(self.override_config)
+                self.config = midgardmvc.components.configloader.merge(self.config, self.override_config)
             return
         
         self._config_contexts[name] = load_config(config_path)
-        self.config.update(self._config_contexts[name])
-
+        self.config = midgardmvc.components.configloader.merge(self.config, self._config_contexts[name])
+        
         if self.override_config:
-            self.config.update(self.override_config)
+            self.config = midgardmvc.components.configloader.merge(self.config, self.override_config)
         
     def prepareRoutes(self):
         pass
