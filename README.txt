@@ -16,6 +16,8 @@ Next go back to ``midgardmvc`` folder and run the following to download all depe
 
 	python setup.py develop
 
+Next configure your Midgard configuration in midgard.local.ini (Defaults can be found in midgard.ini)
+
 Then setup simple Midgard site with default Midgard objects
 
 	paster setup-app development.ini
