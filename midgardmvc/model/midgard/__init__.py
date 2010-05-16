@@ -1,6 +1,26 @@
 from midgardmvc.lib.helpers import midgard
+import formencode
 
 default_skip_fields = ["action", "id", "guid", "metadata"]
+
+class MidgardFormSchema(formencode.Schema):
+    """docstring for Midgard object FormSchema"""
+    mgd_schema_name = None
+    ignore_key_missing = True
+    
+    def __classinit__(cls, new_attrs):
+        if cls.mgd_schema_name:
+            model = eval("midgard.mgdschema.%s" % cls.mgd_schema_name)
+            schema_fields = resolveSchemaFields(model)
+
+            for name, field in schema_fields.iteritems():            
+                if field["type"] != "string":
+                    continue
+                if cls.fields.has_key(name):
+                    continue
+                cls.add_field(name, formencode.validators.String(not_empty=True))
+        
+        formencode.Schema.__classinit__(cls, new_attrs)
 
 def resolveSchemaFields(midgard_object, include_values=False, skip_fields=None, only_fields=None):
     fields = dict()
