@@ -23,6 +23,10 @@ class MidgardMiddleware(object):
     def __call__(self, environ, start_response):
         self.log.debug("MidgardMiddleware::__call__")
         
+        #Remove trailing slash
+        if len(environ.get('PATH_INFO', '')) > 1:
+            environ['PATH_INFO'] = environ.get('PATH_INFO', '').rstrip('/')
+        
         # if environ.has_key('paste.registry'):
         #     environ['paste.registry'].register(MIDGARD, _midgard)
         #     self.log.debug("Register MIDGARD")
