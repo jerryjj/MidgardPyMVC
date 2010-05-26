@@ -1,0 +1,17 @@
+/* Additional styles for jQuery UI time picker addition to jQuery UI date picker */
+.ui-datepicker-time {
+	text-align: center;
+	font-weight: bold;
+	font-size: 0.9em;
+	margin: 0.1em 0 0.2em;
+}
+.ui-datepicker-time .ui-datepicker-time-caption {
+	font-weight: bold;
+	padding-right: 0.5em;
+}
+.ui-datepicker-time select {
+/*	background: #E6E6E6;*/
+	color: #555555;
+	border: 1px solid #AAAAAA;
+	padding: 0.2em;
+}
