@@ -1,4 +1,4 @@
-import _midgard
+#import _midgard
 #from midgardmvc.lib.midgard import MIDGARD, init_midgard_connection
 from midgardmvc.lib.midgard import init_midgard_connection
 
@@ -9,6 +9,9 @@ import logging
 
 # from paste.registry import StackedObjectProxy
 # MIDGARD = StackedObjectProxy(name="midgard", default=_midgard)
+
+from paste.registry import StackedObjectProxy
+helper_stack = StackedObjectProxy(name="helper_stack", default=dict())
 
 class MidgardMiddleware(object):
     """docstring for MidgardMiddleware"""
@@ -27,11 +30,21 @@ class MidgardMiddleware(object):
         if len(environ.get('PATH_INFO', '')) > 1:
             environ['PATH_INFO'] = environ.get('PATH_INFO', '').rstrip('/')
         
+        #TODO: Do language pre-checking here 
+        #TODO: Implement injectors
+        #http://bergie.iki.fi/blog/midcom_3_and_context_injectors/
+        
         # if environ.has_key('paste.registry'):
         #     environ['paste.registry'].register(MIDGARD, _midgard)
         #     self.log.debug("Register MIDGARD")
         
-        environ['midgard.midgard'] = _midgard
+        #if environ.has_key('paste.registry'):
+        registry = environ['paste.registry']
+        registry.register(helper_stack, dict())
+        
+        self._prepareHelperStack()
+        
+        #environ['midgard.midgard'] = _midgard
         
         timezone = self.config.get("Datetime", "timezone", "UTC")
         self.log.debug("Setting timezone to %s" % timezone)
@@ -55,3 +68,27 @@ class MidgardMiddleware(object):
 
     def getDefaultTZ(self):
     	return self.getTimezone(self.config.get("Datetime", "timezone", "UTC"))
+
+    def _prepareHelperStack(self):
+        if not 'header_data' in helper_stack:
+            helper_stack['header_data'] = dict(
+                jquery_enabled = False,
+                jquery_ui_enabled = False,
+                jquery_grid_enabled = False,
+                jquery_ui_enabled_version = None,
+                jquery_ui_loaded_parts = [],
+                jquery_inits = "",            
+                element_groups = [],
+                active_element_group = None,
+                prev_element_group = None,
+                head_datas = dict(
+                    prepend_script = {},
+                    js = {},
+                    script = {},
+                    jquery_states = {},
+                    link = {},
+                    meta = {}
+                ),
+                js_head_urls = [],
+                link_head_urls = []
+            )
