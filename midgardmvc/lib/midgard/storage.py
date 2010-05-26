@@ -2,6 +2,7 @@ import os
 import _midgard as midgard
 
 from midgardmvc.lib.midgard.connection import instance as connection_instance
+from midgardmvc.lib.midgard.utils import asBool
 
 class StorageWrapper(object):
     """docstring for StorageWrapper"""
@@ -33,7 +34,7 @@ class StorageWrapper(object):
         self.createBaseStorage()
         self.createClassStorages()
         
-        if self.config["create_default_content"]:
+        if asBool(self.config["create_default_content"]):
             self.createDefaultContent()
         
     def baseStorageExists(self):
