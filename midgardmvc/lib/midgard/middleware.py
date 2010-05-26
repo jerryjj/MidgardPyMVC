@@ -70,6 +70,7 @@ class MidgardMiddleware(object):
     	return self.getTimezone(self.config.get("Datetime", "timezone", "UTC"))
 
     def _prepareHelperStack(self):
+        helper_stack['breadcrumb_data'] = []
         if not 'header_data' in helper_stack:
             helper_stack['header_data'] = dict(
                 jquery_enabled = False,
