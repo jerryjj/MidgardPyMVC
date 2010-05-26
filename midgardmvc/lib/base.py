@@ -7,9 +7,13 @@ from pylons.templating import render_mako as render
 from pylons import request, tmpl_context as c
 from pylons.i18n.translation import _, set_lang
 
+import midgardmvc.lib.helpers as h
+
 class BaseController(WSGIController):
     def __before__(self, language="en"):
         c.title = _("Midgard CMS")
+        
+        h.header.addMeta(name="generator", value="MidgardPyMVC")
         
         if language:
             set_lang(language)
