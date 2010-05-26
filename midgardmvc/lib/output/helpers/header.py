@@ -106,7 +106,7 @@ def enablejQueryUI(theme_path, mod='all', version='1.7.2'):
     
     startElementGroup('jQueryUI')
     
-    addJSFile("/js/ui/%s/ui.core.js" % version, True)
+    addJSFile("/midcom-static/midgardmvc_core/js/ui/%s/ui.core.js" % version, True)
     
     endElementGroup('jQueryUI')
     
@@ -298,7 +298,7 @@ def addMeta(**opts):
     
     helper_stack['header_data']['head_datas']['meta'][group].append(output)
 
-def addLinkHead(**opts):    
+def addLinkHead(**opts):
     prepend = opts.pop('prepend', False)
     
     if not opts.has_key('href'):
@@ -336,6 +336,20 @@ def addLinkHead(**opts):
         helper_stack['header_data']['head_datas']['link'][group].append(output)
     
     return True
+
+def addStyleLink(**opts):    
+    prepend = opts.pop('prepend', False)
+    
+    if not opts.has_key('href'):
+        return False
+
+    opts['rel'] = 'stylesheet'
+    opts['type'] = 'text/css'
+
+    if not opts.has_key('media'):
+        opts['media'] = 'all'
+
+    return addLinkHead(**opts)
 
 
 def _unify_list(seq, idfun=None): 
