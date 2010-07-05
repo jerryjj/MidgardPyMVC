@@ -2,8 +2,8 @@
 
 <%def name="body()">
 
-<h1>${c.page.title}</h1>
+<h1>${c.node.title}</h1>
 
-${h.literal(c.page.content)}
+${h.literal(c.node.content)}
 
 </%def>

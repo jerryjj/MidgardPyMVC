@@ -9,15 +9,15 @@ import midgardmvc.lib.helpers as h
 
 log = logging.getLogger(__name__)
 
-class PageController(BaseController):
+class NodeController(BaseController):
 
     def show(self, path):
-        c.page = h.midgard.mgdschema.midgard_page()
-        page_found = c.page.get_by_path(path)
+        c.node = h.midgard.mgdschema.midgardmvc_core_node()
+        node_found = c.node.get_by_path(path)
         
-        if not page_found:
+        if not node_found:
             abort(404)
             
-        c.title += ":: " + c.page.title
+        c.title += ":: " + c.node.title
             
-        return render('/page.mako')
+        return render('/node.mako')
