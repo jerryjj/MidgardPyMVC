@@ -16,11 +16,11 @@ from midgardmvc.lib.midgard.auth.decorators import authenticated
 class MainController(BaseController):
     
     def index(self):
-        c.page = h.midgard.mgdschema.midgard_page()
-        page_found = c.page.get_by_path('/midcom_root')
+        c.node = h.midgard.mgdschema.midgardmvc_core_node()
+        node_found = c.node.get_by_path('/midcom_root')
         
-        if page_found:
-            c.title += ":: " + c.page.title
+        if node_found:
+            c.title += ":: " + c.node.title
         else:
             c.title += ":: " + _("Frontpage")
         

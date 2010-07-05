@@ -34,8 +34,8 @@ def make_map():
     
     # CUSTOM ROUTES HERE
     
-    map.connect('/{path}', controller="page", action="show")
-    map.connect('/{language}/{path}', controller="page", action="show", requirements=dict(language='\w{2}'))
+    map.connect('/{path}', controller="node", action="show")
+    map.connect('/{language}/{path}', controller="node", action="show", requirements=dict(language='\w{2}'))
     
     map.connect('/{controller}/{action}')
     map.connect('/{controller}/{action}/{id}')

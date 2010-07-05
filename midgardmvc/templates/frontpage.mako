@@ -2,10 +2,10 @@
 
 <%def name="body()">
 
-% if c.page.guid:
-	<h1>${c.page.title}</h1>
+% if c.node.guid:
+	<h1>${c.node.title}</h1>
 	
-	${h.literal(c.page.content)}
+	${h.literal(c.node.content)}
 % endif
 
 <br />

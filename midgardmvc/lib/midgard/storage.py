@@ -4,6 +4,19 @@ import _midgard as midgard
 from midgardmvc.lib.midgard.connection import instance as connection_instance
 from midgardmvc.lib.midgard.utils import asBool
 
+_available_classes = []
+def get_mgdschema_classes(force_reload = False):
+    global _available_classes
+    
+    if len(_available_classes) > 0 and not force_reload:
+        return _available_classes
+    
+    for name in dir(midgard.mgdschema):
+        if not name in ["midgard_object", "metadata", "__doc__", "__name__", "__package__"]:
+            _available_classes.append(name)
+    
+    return _available_classes
+
 class StorageWrapper(object):
     """docstring for StorageWrapper"""
     
@@ -26,7 +39,11 @@ class StorageWrapper(object):
     def setConfig(self, config):
         self.config.update(config)
         
-        self.config["schemas"] = self.config["schemas"].split(";")
+        if (isinstance(self.config["schemas"], str)):
+            self.config["schemas"] = self.config["schemas"].split(";")
+        
+        if not self.config["schemas"]:
+            self.config["schemas"] = get_mgdschema_classes()
         
     def initialize(self):
         self._initialized = True
@@ -43,30 +60,29 @@ class StorageWrapper(object):
         #     db_file_path = os.path.expanduser('~/.midgard2/data/' + connection_instance.midgard_config.database + '.db')
         #     return os.path.exists(db_file_path)
         
-        return midgard.storage.class_storage_exists("midgard_user")
+        try:
+            return midgard.storage.class_storage_exists("midgard_user")
+        except Exception, e:
+            self._log.error("Exception while calling midgard.storage.class_storage_exists: %s" % e)
+        
+        return False
     
     def classStorageExists(self, classname):
-        return midgard.storage.class_storage_exists(classname)
+        try:
+            return midgard.storage.class_storage_exists(classname)
+        except Exception, e:
+            self._log.error("Exception while calling midgard.storage.class_storage_exists(%s): %s" % (classname, e))
+        return False
     
     def createBaseStorage(self):
         if self.baseStorageExists():
             self._log.debug("Base storage already exists")
             return False
-
-        import threading
-
-        create_ok = True
-        cthread = threading.Thread(name='base storage', target=_returnToPointer, args=(midgard.storage.create_base_storage, create_ok))
-        if cthread == None:
-            self._log.error("could not create thread for create_base_storage()")
-            raise Exception("could not create thread for create_base_storage()")
-        cthread.start()
-        while cthread.isAlive():
-            self._log.debug("waiting for %s" % cthread.getName())
-            cthread.join(0.1)
-        self._log.debug("waiting (blocking) for %s" % cthread.getName())
-        cthread.join()
-        self._log.debug("done")
+        
+        self._log.debug("Creating base storage")
+        
+        create_ok = midgard.storage.create_base_storage()
+        
         if not create_ok:
             self._log.error("Could not create base storage, reason: %s" % midgard._connection.get_error_string())
             raise Exception("Could not create base storage, reason: %s" % midgard._connection.get_error_string())
@@ -80,32 +96,12 @@ class StorageWrapper(object):
             
             if not self.classStorageExists(classname):
                 self._log.debug("creating class storage for %s" % classname)
-                cthread = threading.Thread(name=classname + ' storage', target=_returnToPointer, args=(midgard.storage.create_class_storage, create_ok), kwargs={ 'function_args': classname, } )
-                if cthread == None:
-                    self._log.error("could not create thread for create_class_storage(%s)" % classname)
-                    raise Exception("could not create thread for create_class_storage(%s)" % classname)
-                cthread.start()
-                while cthread.isAlive():
-                    self._log.debug("waiting for %s" % cthread.getName())
-                    cthread.join(0.1)
-                self._log.debug("waiting (blocking) for %s" % cthread.getName())
-                cthread.join()
-                self._log.debug("done")
+                create_ok = midgard.storage.create_class_storage(classname)
             else:
                 self._log.debug("Class %s exists" % classname)
                 self._log.debug("Trying to update...")
                 
-                cthread = threading.Thread(name=classname + ' storageUpdate', target=_returnToPointer, args=(midgard.storage.update_class_storage, update_ok), kwargs={ 'function_args': classname, } )
-                if cthread == None:
-                    self._log.error("could not create thread for update_class_storage(%s)" % classname)
-                    raise Exception("could not create thread for update_class_storage(%s)" % classname)
-                cthread.start()
-                while cthread.isAlive():
-                    self._log.debug("waiting for %s" % cthread.getName())
-                    cthread.join(0.1)
-                self._log.debug("waiting (blocking) for %s" % cthread.getName())
-                cthread.join()
-                self._log.debug("done")
+                update_ok = midgard.storage.update_class_storage(classname)
                 
                 if not update_ok:
                     self._log.error("Error while updating storage for class %s, reason: %s" % (classname, midgard._connection.get_error_string()))
@@ -117,22 +113,23 @@ class StorageWrapper(object):
     def createDefaultContent(self):
         """Creates some default content for basic Midgard site"""
         
-        #Create root page
-        root_page = midgard.mgdschema.midgard_page()
-        root_page_exists = root_page.get_by_path('/midcom_root')
+        #Create root node
+        root_node = midgard.mgdschema.midgardmvc_core_node()
         
-        if not root_page_exists:
-            self._log.debug("/midcom_root -page not found. Creating...")
-            root_page.name = "midcom_root"
-            root_page.title = "Midcom root"
-            root_page.content = "Hello, world!"
+        if not root_node.get_by_path('/midcom_root'):
+            self._log.debug("/midcom_root -node not found. Creating...")
+            root_node.name = "midcom_root"
+            root_node.title = "Midcom root"
+            root_node.content = "Hello, world!"
             
             try:
-                root_page.create()
-                self._log.debug("/midcom_root -page created")
+                root_node.create()
+                self._log.debug("/midcom_root -node created")
             except:
-                self._log.error("Could not create root page, reason: %s" % midgard._connection.get_error_string())
-    
+                self._log.error("Could not create root node, reason: %s" % midgard._connection.get_error_string())
+        
+        
+        
 def _returnToPointer(function_pointer, return_pointer, function_args=None):
     if function_args is None:
         return_pointer = function_pointer()
