@@ -16,6 +16,10 @@ Next go back to ``midgardmvc`` folder and run the following to download all depe
 
 	python setup.py develop
 
+Symlink MVC schemas to Midgard schema folder
+
+	(sudo) ln -s /PATH_TO_MIDGARDMVC/config/midgardmvc_core.xml /usr/share/midgard2/schema/midgardmvc_core.xml
+
 Next configure your Midgard configuration in midgard.local.ini (Defaults can be found in midgard.ini)
 
 Then setup simple Midgard site with default Midgard objects
