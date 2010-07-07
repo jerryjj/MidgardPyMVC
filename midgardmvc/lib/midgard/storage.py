@@ -54,17 +54,6 @@ class StorageWrapper(object):
         if asBool(self.config["create_default_content"]):
             self.createDefaultContent()
         
-    def baseStorageExists(self):
-        # if connection_instance.midgard_config.dbtype.lower() == "sqlite":
-        #     """TODO: Try to resolve using dbdir -configuration key, after it is enbaled in Midgard"""
-        #     db_file_path = os.path.expanduser('~/.midgard2/data/' + connection_instance.midgard_config.database + '.db')
-        #     return os.path.exists(db_file_path)
-        
-        try:
-            return midgard.storage.class_storage_exists("midgard_user")
-        except Exception, e:
-            self._log.error("Exception while calling midgard.storage.class_storage_exists: %s" % e)
-        
         return False
     
     def classStorageExists(self, classname):
@@ -74,11 +63,7 @@ class StorageWrapper(object):
             self._log.error("Exception while calling midgard.storage.class_storage_exists(%s): %s" % (classname, e))
         return False
     
-    def createBaseStorage(self):
-        if self.baseStorageExists():
-            self._log.debug("Base storage already exists")
-            return False
-        
+    def createBaseStorage(self):        
         self._log.debug("Creating base storage")
         
         create_ok = midgard.storage.create_base_storage()
@@ -87,9 +72,7 @@ class StorageWrapper(object):
             self._log.error("Could not create base storage, reason: %s" % midgard._connection.get_error_string())
             raise Exception("Could not create base storage, reason: %s" % midgard._connection.get_error_string())
     
-    def createClassStorages(self):
-        import threading
-        
+    def createClassStorages(self):        
         for classname in self.config["schemas"]:
             create_ok = True
             update_ok = True
@@ -127,8 +110,6 @@ class StorageWrapper(object):
                 self._log.debug("/midcom_root -node created")
             except:
                 self._log.error("Could not create root node, reason: %s" % midgard._connection.get_error_string())
-        
-        
         
 def _returnToPointer(function_pointer, return_pointer, function_args=None):
     if function_args is None:
