@@ -66,3 +66,13 @@ footer
 {
     margin-top: 0px;
 }
+
+a img,
+#container a img,
+#header a img {
+    border: none;
+}
+
+.grouplogo a img {
+    border: none;
+}
