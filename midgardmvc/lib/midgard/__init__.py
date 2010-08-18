@@ -14,7 +14,7 @@ def make_midgard_middleware(app, mgd_config_path, mgd_logger):
     if not _mgd_config:
         _load_midgard_config_to_globals(mgd_config_path)
     
-    mw = middleware.MidgardMiddleware(app, _mgd_config, mgd_logger)
+    mw = middleware.MidgardMiddleware(app, _mgd_config, mgd_logger, mgd_config_path)
 
     return mw
 
@@ -22,13 +22,12 @@ def init_midgard_connection(mgd_config_path, mgd_logger):
     if not _mgd_config and mgd_config_path:
         _load_midgard_config_to_globals(mgd_config_path)
     
-    if not connection_instance.connected:    
-        connection_config = get_section_from_config(_mgd_config, "Connection")
-    
-        connection_instance.setLogger(logging.getLogger(mgd_logger))
-        connection_instance.setConfig(connection_config)
+    connection_config = get_section_from_config(_mgd_config, "Connection")
 
-        connection_instance.connect()
+    connection_instance.setLogger(logging.getLogger(mgd_logger))
+    connection_instance.setConfig(connection_config)
+
+    connection_instance.connect()
     
     return connection_instance.connected
     

@@ -15,16 +15,19 @@ helper_stack = StackedObjectProxy(name="helper_stack", default=dict())
 
 class MidgardMiddleware(object):
     """docstring for MidgardMiddleware"""
-    def __init__(self, app, config, logger):
+    def __init__(self, app, config, logger, mgd_config_path):
         self.app = app
         self.config = config
         self.logger_name = logger
         self.log = logging.getLogger(logger)
+        self.mgd_config_path = mgd_config_path
         
         self.log.debug("MidgardMiddleware::__init__")
 
     def __call__(self, environ, start_response):
         self.log.debug("MidgardMiddleware::__call__")
+        
+        init_midgard_connection(self.mgd_config_path, self.logger_name)
         
         #Remove trailing slash
         if len(environ.get('PATH_INFO', '')) > 1:
@@ -34,17 +37,10 @@ class MidgardMiddleware(object):
         #TODO: Implement injectors
         #http://bergie.iki.fi/blog/midcom_3_and_context_injectors/
         
-        # if environ.has_key('paste.registry'):
-        #     environ['paste.registry'].register(MIDGARD, _midgard)
-        #     self.log.debug("Register MIDGARD")
-        
-        #if environ.has_key('paste.registry'):
         registry = environ['paste.registry']
         registry.register(helper_stack, dict())
         
         self._prepareHelperStack()
-        
-        #environ['midgard.midgard'] = _midgard
         
         timezone = self.config.get("Datetime", "timezone", "UTC")
         self.log.debug("Setting timezone to %s" % timezone)

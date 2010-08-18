@@ -12,8 +12,7 @@ class ConnectionWrapper(object):
         self._log = None
         self.config = dict(
             dbtype = "SQLite",
-            database = "midgardmvc",
-            sitegroup = None,
+            database = "midgardmvc"
         )
         
         self._connected = False
@@ -49,22 +48,11 @@ class ConnectionWrapper(object):
             
             setattr(self._mgd_config, key, value)
         
-        # if configuration.has_key("dbdir")        
-        #self.database_path = os.path.expanduser('~/.midgard2/data/' + self._mgd_config.database + '.db')
-        
-    def connect(self):
-        if self._connected:
-            return True
-        
+    def connect(self):        
         self._connected = self._connection.open_config(self._mgd_config)
         
         if not self._connected:
             raise Exception('Could not open database connection, reason: %s' % midgard._connection.get_error_string())
-        
-        # if self.config["sitegroup"]:
-        #     self._log.debug("Trying to set sitegroup to %s" % self.config["sitegroup"])
-        #     if not self._connection.set_sitegroup(self.config["sitegroup"]):
-        #         self._log.error("Sitegroup %s not found" % self.config["sitegroup"])
         
         return True
 
