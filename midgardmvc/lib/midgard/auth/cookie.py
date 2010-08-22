@@ -167,6 +167,12 @@ class MidgardCookieAuth(AuthTktCookiePlugin):
         
         user = h.midgard.db.user.get({"login": identity.get("login"), "authtype": self.authtype})
         
+        if not user:
+            # Try to reopen db connection and then try again
+            from midgardmvc.lib.midgard.connection import instance as connection_instance
+            if connection_instance.reconnect():
+                user = h.midgard.db.user.get({"login": identity.get("login"), "authtype": self.authtype})
+        
         log.debug("user: ")
         log.debug(user)
 

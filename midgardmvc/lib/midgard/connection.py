@@ -55,6 +55,16 @@ class ConnectionWrapper(object):
             raise Exception('Could not open database connection, reason: %s' % midgard._connection.get_error_string())
         
         return True
+    
+    def reconnect(self):
+        try:
+            self._connected = self._connection.reopen()
+        except Exception, e:
+            print "Exception occurred while trying to reconnect: "
+            print e
+            self._connected = False
+        
+        return self._connected
 
 instance = ConnectionWrapper()
         
