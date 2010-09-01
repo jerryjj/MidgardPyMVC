@@ -4,7 +4,7 @@ Provides the BaseController class for subclassing.
 """
 from pylons.controllers import WSGIController
 from pylons.templating import render_mako as render
-from pylons import request, tmpl_context as c
+from pylons import request, response, tmpl_context as c
 from pylons.i18n.translation import _, set_lang
 
 import midgardmvc.lib.helpers as h
