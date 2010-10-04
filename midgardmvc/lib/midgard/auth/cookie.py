@@ -90,7 +90,7 @@ class MidgardCookieAuth(AuthTktCookiePlugin):
         log.debug("cookieAuth remember")
         
         if self.include_ip:
-            remote_addr = environ['REMOTE_ADDR']
+            remote_addr = environ.get('REMOTE_ADDR', '0.0.0.0')
         else:
             remote_addr = '0.0.0.0'
 
