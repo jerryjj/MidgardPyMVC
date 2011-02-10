@@ -52,7 +52,18 @@ class MidgardMiddleware(object):
         
         environ = midgardmvc.lib.componentloader.connect_components_to_environ(environ)
         
-        return self.app(environ, start_response)
+        try:
+            return self.app(environ, start_response)
+        finally:
+            self._cleanup(environ)
+
+    def _cleanup(self, environ):
+        if environ.has_key('repoze.who.identity'):
+            identity = environ.get('repoze.who.identity')
+
+            if identity and identity.has_key("midgard.user"):
+                user = identity.get("midgard.user")
+                user.log_out()
 
     def getTimezone(self, tz_str):
     	import pytz
