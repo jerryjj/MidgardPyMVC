@@ -1,8 +1,21 @@
 import os
-import _midgard as midgard
+import gobject
+from gi.repository import Midgard, GObject
 
 from midgardmvc.lib.midgard.connection import instance as connection_instance
 from midgardmvc.lib.midgard.utils import asBool
+
+def get_dbobject_derived(typename, types):
+  children = GObject.type_children(typename)
+  for gtype in children:
+    childname = GObject.type_name(gtype)
+    get_dbobject_derived(childname, types)
+    # FIXME, core should support some routines to check if type could have storage 
+    if (GObject.type_is_a(gtype, GObject.type_from_name("MidgardBaseInterface"))
+        or gtype.is_abstract()
+        or childname == "MidgardMetadata"):
+      continue
+    types.append(childname)
 
 _available_classes = []
 def get_mgdschema_classes(force_reload = False):
@@ -10,12 +23,8 @@ def get_mgdschema_classes(force_reload = False):
     
     if len(_available_classes) > 0 and not force_reload:
         return _available_classes
-    
-    for name in dir(midgard.mgdschema):
-        if not name in ["midgard_object", "metadata", "__doc__", "__name__", "__package__"]:
-            _available_classes.append(name)
-    
-    return _available_classes
+   
+    get_dbobject_derived("MidgardDBObject", _available_classes)
 
 class StorageWrapper(object):
     """docstring for StorageWrapper"""
