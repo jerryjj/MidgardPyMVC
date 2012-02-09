@@ -52,7 +52,7 @@ class ConnectionWrapper(object):
         self._connected = self._connection.open_config(self._mgd_config)
         
         if not self._connected:
-            raise Exception('Could not open database connection, reason: %s' % midgard._connection.get_error_string())
+            raise Exception('Could not open database connection, reason: %s' % self._connection.get_error_string())
         
         return True
     
