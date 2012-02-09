@@ -46,7 +46,7 @@ class ConnectionWrapper(object):
             if not key in ConnectionWrapper.allowed_mgd_config_keys:
                 continue
             
-            setattr(self._mgd_config, key, value)
+            self._mgd_config.set_property(key, value)
         
     def connect(self):        
         self._connected = self._connection.open_config(self._mgd_config)
