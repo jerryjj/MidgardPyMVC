@@ -1,5 +1,5 @@
 import os
-import _midgard as midgard
+from gi.repository import GObject, Midgard
 
 class NoOpenConnections(Exception): pass
 
@@ -17,8 +17,8 @@ class ConnectionWrapper(object):
         
         self._connected = False
         
-        self._mgd_config = midgard.config()
-        self._connection = midgard.connection()
+        self._mgd_config = Midgard.Config()
+        self._connection = Midgard.Connection()
     
     @property
     def connected(self):
@@ -66,5 +66,4 @@ class ConnectionWrapper(object):
         
         return self._connected
 
-instance = ConnectionWrapper()
-        
+instance = ConnectionWrapper()    

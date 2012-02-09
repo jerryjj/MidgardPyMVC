@@ -17,7 +17,8 @@ import midgardmvc.lib.output.helpers.header as header
 import logging
 log = logging.getLogger(__name__)
 
-import _midgard as midgard
+from gi.repository import GObject, Midgard
+
 #from midgardmvc.lib.midgard.middleware import MIDGARD as midgard
 
 flash = _Flash()
