@@ -11,9 +11,8 @@ def get_dbobject_derived(typename, types):
     childname = GObject.type_name(gtype)
     get_dbobject_derived(childname, types)
     # FIXME, core should support some routines to check if type could have storage 
-    if (GObject.type_is_a(gtype, GObject.type_from_name("MidgardBaseInterface"))
-        or gtype.is_abstract()
-        or childname == "MidgardMetadata"):
+    #if (GObject.type_is_a(gtype, GObject.type_from_name("MidgardBaseInterface"))
+    if (gtype.is_abstract() or childname == "MidgardMetadata"):
       continue
     types.append(childname)
 
@@ -25,6 +24,7 @@ def get_mgdschema_classes(force_reload = False):
         return _available_classes
    
     get_dbobject_derived("MidgardDBObject", _available_classes)
+    return _available_classes
 
 class StorageWrapper(object):
     """docstring for StorageWrapper"""
@@ -67,7 +67,7 @@ class StorageWrapper(object):
     
     def classStorageExists(self, classname):
         try:
-            return midgard.storage.class_storage_exists(classname)
+            return Midgard.Storage.exists(connection_instance.connection, classname)
         except Exception, e:
             self._log.error("Exception while calling midgard.storage.class_storage_exists(%s): %s" % (classname, e))
         return False
@@ -75,11 +75,12 @@ class StorageWrapper(object):
     def createBaseStorage(self):        
         self._log.debug("Creating base storage")
         
-        create_ok = midgard.storage.create_base_storage()
+        create_ok = Midgard.Storage.create_base_storage(connection_instance.connection)
+        print create_ok
         
         if not create_ok:
-            self._log.error("Could not create base storage, reason: %s" % midgard._connection.get_error_string())
-            raise Exception("Could not create base storage, reason: %s" % midgard._connection.get_error_string())
+            self._log.error("Could not create base storage, reason: %s" % connection_instance.connection.get_error_string())
+            raise Exception("Could not create base storage, reason: %s" % connection_instance.connection.get_error_string())
     
     def createClassStorages(self):        
         for classname in self.config["schemas"]:
@@ -88,19 +89,19 @@ class StorageWrapper(object):
             
             if not self.classStorageExists(classname):
                 self._log.debug("creating class storage for %s" % classname)
-                create_ok = midgard.storage.create_class_storage(classname)
+                create_ok = Midgard.Storage.create(connection_instance.connection, classname)
             else:
                 self._log.debug("Class %s exists" % classname)
                 self._log.debug("Trying to update...")
                 
-                update_ok = midgard.storage.update_class_storage(classname)
+                update_ok = Midgard.Storage.update(connection_instance.connection, classname)
                 
                 if not update_ok:
-                    self._log.error("Error while updating storage for class %s, reason: %s" % (classname, midgard._connection.get_error_string()))
+                    self._log.error("Error while updating storage for class %s, reason: %s" % (classname, connection_instance.connection.get_error_string()))
                 
             if not create_ok:
-                self._log.error("Could not create storage for class %s, reason: %s" % (classname, midgard._connection.get_error_string()))
-                raise Exception("Could not create storage for class %s, reason: %s" % (classname, midgard._connection.get_error_string()))
+                self._log.error("Could not create storage for class %s, reason: %s" % (classname, connection_instance.connection.get_error_string()))
+                raise Exception("Could not create storage for class %s, reason: %s" % (classname, connection_instance.connection.get_error_string()))
     
     def createDefaultContent(self):
         """Creates some default content for basic Midgard site"""
@@ -118,7 +119,7 @@ class StorageWrapper(object):
                 root_node.create()
                 self._log.debug("/midcom_root -node created")
             except:
-                self._log.error("Could not create root node, reason: %s" % midgard._connection.get_error_string())
+                self._log.error("Could not create root node, reason: %s" % connection_instance.connection.get_error_string())
         
 def _returnToPointer(function_pointer, return_pointer, function_args=None):
     if function_args is None:
