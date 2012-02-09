@@ -16,7 +16,10 @@ class ConnectionWrapper(object):
         )
         
         self._connected = False
-        
+
+        print "Call Midgard.init() in better place"
+        Midgard.init()
+
         self._mgd_config = Midgard.Config()
         self._connection = Midgard.Connection()
     
