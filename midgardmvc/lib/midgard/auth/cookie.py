@@ -189,7 +189,7 @@ class MidgardCookieAuth(AuthTktCookiePlugin):
             log.debug("person: ")
             log.debug(person)
             
-            identity["midgard.person.guid"] = person.guid
+            identity["midgard.person.guid"] = person.get_property("guid")
         
         return identity["midgard.person.guid"]
 
