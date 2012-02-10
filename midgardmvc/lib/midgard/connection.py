@@ -56,7 +56,11 @@ class ConnectionWrapper(object):
         
         if not self._connected:
             raise Exception('Could not open database connection, reason: %s' % self._connection.get_error_string())
-        
+   
+        self._connection.enable_dbus(False)
+        self._connection.enable_quota(False)
+        #self._connection.enable_replication(False)
+
         return True
     
     def reconnect(self):
