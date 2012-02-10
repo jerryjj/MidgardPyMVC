@@ -63,7 +63,7 @@ class MidgardMiddleware(object):
 
             if identity and identity.has_key("midgard.user"):
                 user = identity.get("midgard.user")
-                user.logout()
+                user.log_out()
 
     def getTimezone(self, tz_str):
     	import pytz
