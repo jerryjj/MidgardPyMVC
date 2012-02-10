@@ -36,7 +36,7 @@ class AuthController(BaseController):
                                 __logins=login_counter))
         
         person = identity['midgard.person']
-        h.flash_ok('Welcome back, %s!' % person.firstname)
+        h.flash_ok('Welcome back, %s!' % person.get_property("firstname"))
         
         redirect(url(came_from))
     

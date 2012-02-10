@@ -1,12 +1,12 @@
 import os
-import _midgard as midgard
+from gi.repository import GObject, Midgard
 
 class NoOpenConnections(Exception): pass
 
 class ConnectionWrapper(object):
     """docstring for ConnectionWrapper"""
     
-    allowed_mgd_config_keys = ["dbtype", "dbuser", "dbpass", "dbport", "database", "dbdir", "blobdir", "loglevel"]
+    allowed_mgd_config_keys = ["dbtype", "dbuser", "dbpass", "dbport", "database", "dbdir", "blobdir", "loglevel", "GdaThreads"]
     
     def __init__(self):
         self._log = None
@@ -16,9 +16,12 @@ class ConnectionWrapper(object):
         )
         
         self._connected = False
-        
-        self._mgd_config = midgard.config()
-        self._connection = midgard.connection()
+
+        print "Call Midgard.init() in better place"
+        Midgard.init()
+
+        self._mgd_config = Midgard.Config()
+        self._connection = Midgard.Connection()
     
     @property
     def connected(self):
@@ -46,14 +49,18 @@ class ConnectionWrapper(object):
             if not key in ConnectionWrapper.allowed_mgd_config_keys:
                 continue
             
-            setattr(self._mgd_config, key, value)
+            self._mgd_config.set_property(key, value)
         
     def connect(self):        
         self._connected = self._connection.open_config(self._mgd_config)
         
         if not self._connected:
-            raise Exception('Could not open database connection, reason: %s' % midgard._connection.get_error_string())
-        
+            raise Exception('Could not open database connection, reason: %s' % self._connection.get_error_string())
+   
+        self._connection.enable_dbus(False)
+        self._connection.enable_quota(False)
+        #self._connection.enable_replication(False)
+
         return True
     
     def reconnect(self):
@@ -66,5 +73,4 @@ class ConnectionWrapper(object):
         
         return self._connected
 
-instance = ConnectionWrapper()
-        
+instance = ConnectionWrapper()    
