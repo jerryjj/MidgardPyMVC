@@ -20,6 +20,8 @@ from repoze.who.interfaces import IIdentifier
 from repoze.who.interfaces import IAuthenticator
 
 from repoze.who.plugins.auth_tkt import AuthTktCookiePlugin, make_plugin as make_repoze_who_auth_tkt_plugin
+from password import midgard_user_get
+from midgardmvc.lib.midgard.connection import instance as connection_instance
 
 _NOW_TESTING = None  # unit tests can replace
 def _now():  #pragma NO COVERAGE
@@ -153,31 +155,26 @@ class MidgardCookieAuth(AuthTktCookiePlugin):
         log.debug(identity)
         
         user_guid = identity.get('midgard.user.guid')
-        
-        if "midgard.midgard" in environ:
-            midgard = environ["midgard.midgard"]
-        else:
-            midgard = h.midgard
-        
+               
         if user_guid is None:
             return None
 
         if self.userid_checker and not self.userid_checker(user_guid):
             return None
         
-        user = h.midgard.db.user.get({"login": identity.get("login"), "authtype": self.authtype})
+        user = midgard_user_get(identity.get("login"),self.authtype, None)
         
         if not user:
             # Try to reopen db connection and then try again
             from midgardmvc.lib.midgard.connection import instance as connection_instance
             if connection_instance.reconnect():
-                user = h.midgard.db.user.get({"login": identity.get("login"), "authtype": self.authtype})
+                user = midgard_user_get(identity.get("login"), self.authtype, None)
         
         log.debug("user: ")
         log.debug(user)
 
         if not user:
-            log.error("User %s (%s / %s) not found, reason: %s" % (user_guid, identity.get("login"), self.authtype, midgard._connection.get_error_string()))
+            log.error("User %s (%s / %s) not found, reason: %s" % (user_guid, identity.get("login"), self.authtype, connection_instance.connection.get_error_string()))
             return None
         
         status = user.log_in()
