@@ -50,7 +50,7 @@ class midgard_legacy_query_builder():
       self.group = Midgard.QueryConstraintGroup(grouptype = "AND")
     self.group.add_constraint(
       Midgard.QueryConstraint(
-        property = Midgard.QueryProperty(property = "name"),
+        property = Midgard.QueryProperty(property = name),
         operator = operator,
         holder = Midgard.QueryValue.create_with_value(value)
       )
