@@ -6,7 +6,7 @@ class NoOpenConnections(Exception): pass
 class ConnectionWrapper(object):
     """docstring for ConnectionWrapper"""
     
-    allowed_mgd_config_keys = ["dbtype", "dbuser", "dbpass", "dbport", "database", "dbdir", "blobdir", "loglevel"]
+    allowed_mgd_config_keys = ["dbtype", "dbuser", "dbpass", "dbport", "database", "dbdir", "blobdir", "loglevel", "GdaThreads"]
     
     def __init__(self):
         self._log = None
