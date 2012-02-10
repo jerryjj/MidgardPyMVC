@@ -17,6 +17,7 @@ def midgard_user_get(username, authtype, password):
   mgd = connection_instance.connection
   strg = Midgard.QueryStorage(dbclass = "MidgardUser")
   qs = Midgard.QuerySelect(connection = mgd, storage = strg)
+  qs.toggle_read_only(False)
   group = Midgard.QueryConstraintGroup(grouptype = "AND")
   constraint_login = Midgard.QueryConstraint(
     property = Midgard.QueryProperty(property = "login"),
@@ -87,15 +88,16 @@ class MidgardPasswordAuth(MidgardAuth):
             return None
         
         person = user.get_person()
-        
+       
+        print user.get_property ("person")
         log.debug("Person:")
         log.debug(person)
         
         identity["midgard.user"] = user
-        identity["midgard.user.guid"] = user.guid
-        identity["midgard.person.guid"] = person.guid
+        identity["midgard.user.guid"] = user.get_property("guid")
+        identity["midgard.person.guid"] = person.get_property("guid")
         
-        return person.guid
+        return person.get_property("guid")
 
 def make_plugin(**config):
     return MidgardPasswordAuth(config)
