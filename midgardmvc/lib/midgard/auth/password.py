@@ -9,7 +9,9 @@ import logging
 log = logging.getLogger(__name__)
 
 from midgardmvc.lib.midgard.auth import MidgardAuth, prepare_password
-import midgardmvc.lib.helpers as h
+
+from gi.repository import Midgard, GObject
+from midgardmvc.lib.midgard.connection import instance as connection_instance
 
 class MidgardPasswordAuth(MidgardAuth):
     implements(IAuthenticator)
@@ -17,6 +19,7 @@ class MidgardPasswordAuth(MidgardAuth):
     #IAuthenticator plugin
     def authenticate(self, environ, identity):
         authtype = self.config["authtype"]
+        mgd = connection_instance.connection
         
         try:
             username = identity['login']
@@ -26,7 +29,41 @@ class MidgardPasswordAuth(MidgardAuth):
         
         log.debug("authenticate user with %s / %s using authtype: %s" % (username, password, authtype))
 
-        user = h.midgard.db.user.get({"login": username, "authtype": authtype, "password": password})
+        strg = Midgard.QueryStorage(dbclass = "MidgardUser")
+        qs = Midgard.QuerySelect(connection = mgd, storage = strg)
+        group = Midgard.QueryConstraintGroup(grouptype = "AND")
+        constraint_login = Midgard.QueryConstraint(
+            property = Midgard.QueryProperty(property = "login"),
+            operator = "=",
+            holder = Midgard.QueryValue.create_with_value(str(username))
+        )
+        constraint_authtype = Midgard.QueryConstraint(
+            property = Midgard.QueryProperty(property = "authtype"),
+            operator = "=",
+            holder = Midgard.QueryValue.create_with_value(str(authtype))
+        )
+        constraint_pwd = Midgard.QueryConstraint(
+            property = Midgard.QueryProperty(property = "password"),
+            operator = "=",
+            holder = Midgard.QueryValue.create_with_value(str(password))
+        )
+        group.add_constraint(constraint_login)
+        group.add_constraint(constraint_authtype)
+        group.add_constraint(constraint_pwd)
+        qs.set_constraint(group)
+
+        try:
+          qs.execute()
+        except GObject.GError as e:
+          log.debug("Can not fetch user. Query execution failed")
+          return None
+
+        if qs.get_results_count() == 0:
+          return None
+
+        objects = qs.list_objects()
+        user = objects[0]
+        #user = Midgard.User.get(connection_instance.connection, {"login": username, "authtype": authtype, "password": password})
         
         log.debug("User:")
         log.debug(user)
