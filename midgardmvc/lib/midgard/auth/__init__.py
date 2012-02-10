@@ -5,7 +5,8 @@ from zope.interface import implements
 from repoze.who.interfaces import IMetadataProvider
 from pylons import request
 
-import midgardmvc.lib.helpers as h
+from gi.repository import Midgard
+from midgardmvc.lib.midgard.connection import instance as connection_instance
 
 class MidgardAuth(object):
     """docstring for MidgardAuth"""
@@ -20,13 +21,14 @@ class MidgardAuth(object):
         """Fetch Midgard person based on UUID in identity"""
         person_uuid = identity.get('repoze.who.userid')
 
-        person = h.midgard.mgdschema.midgard_person(person_uuid)
+        person = Midgard.Object.factory (connection_instance.connection, "midgard_person", person_uuid)
+        #person = h.midgard.mgdschema.midgard_person(person_uuid)
 
         identity['midgard.person'] = person
         
 def get_active_user():
     identity = request.environ.get('repoze.who.identity')
-    
+    mgd = connection_instance.connection
     if not identity:
         return None
     
@@ -34,15 +36,23 @@ def get_active_user():
         # if not identity.has_key("midgard.user.guid"):
         #     return h.midgard._connection.get_user()
         # else:
-        qb = h.midgard.query_builder('midgard_user')
-        qb.add_constraint('guid', '=', identity["midgard.user.guid"])
-        
-        results = qb.execute()
-        if len(results) > 0:
-            return results[0]
-        
-        return None
-    
+        st = Midgard.QueryStorage(dbclass = "midgard_user")
+        qs = Midgard.QuerySelect(connection = mgd, storage = st)
+        qs.toggle_read_only(False)
+        qs.set_constraint(
+          Midgard.QueryConstraint(
+            property = Midgard.QueryProperty(property = "guid"),
+            operator = "=",
+            holder = Midgard.QueryValue.create_with_value(identity["midgard.user.guid"])
+          )
+        )
+        qs.execute()
+        if qs.get_results_count() == 0:
+          return None
+
+        results = qs.list_objects()
+        return results[0]
+       
     return identity["midgard.user"]
     
 def get_active_user_person():
