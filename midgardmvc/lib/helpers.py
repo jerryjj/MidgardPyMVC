@@ -39,6 +39,7 @@ def flash_alert(message):
 class midgard_legacy_query_builder():
   group = None
   qs = None
+  constraints = 0
   
   def __init__(self, name):
     storage = Midgard.QueryStorage(dbclass = name)
@@ -55,11 +56,15 @@ class midgard_legacy_query_builder():
         holder = Midgard.QueryValue.create_with_value(value)
       )
     )
+    self.constraints = self.constraints + 1
 
   def get_query_select(self):
     return self.qs
 
   def execute(self):
+    # workaround for one constraint in group
+    if self.constraints == 1:
+      self.add_constraint("guid", "<>", "")
     if self.group is not None:
       self.qs.set_constraint(self.group)
     self.qs.execute()
